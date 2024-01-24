@@ -87,21 +87,22 @@ impl Read for Reader {
 
 impl Write for Writer {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        let len = if self.offset != 0 {
+        let buf = if self.offset != 0 {
             if let Some(header) =
                 crate::codec::generate_packet_information(true, crate::codec::is_ipv6(buf)?)
             {
                 (&mut self.buf[..self.offset]).put_slice(header.as_ref());
-                self.offset + buf.len()
+                let len = self.offset + buf.len();
+                (&mut self.buf[self.offset..len]).put_slice(buf);
+                &self.buf[..len]
             } else {
-                buf.len()
+                buf
             }
         } else {
-            buf.len()
+            buf
         };
-        (&mut self.buf[self.offset..len]).put_slice(buf);
         unsafe {
-            let amount = libc::write(self.fd.as_raw_fd(), self.buf.as_ptr() as *const _, len);
+            let amount = libc::write(self.fd.as_raw_fd(), buf.as_ptr() as *const _, buf.len());
 
             if amount < 0 {
                 return Err(io::Error::last_os_error());

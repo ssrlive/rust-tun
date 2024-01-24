@@ -83,9 +83,7 @@ impl Decoder for TunPacketCodec {
         if buf.is_empty() {
             return Ok(None);
         }
-
         let pkt = buf.split_to(buf.len());
-
         let bytes = pkt.freeze();
         Ok(Some(bytes.into()))
     }
