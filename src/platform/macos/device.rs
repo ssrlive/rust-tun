@@ -57,7 +57,7 @@ impl AsMut<dyn AbstractDevice<Queue = Tun> + 'static> for Device {
 impl Device {
     /// Create a new `Device` for the given `Configuration`.
     pub fn new(config: &Configuration) -> Result<Self> {
-        let mtu = config.mtu.unwrap_or(1500);
+        let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
         if let Some(fd) = config.raw_fd {
             let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
             let device = Device {

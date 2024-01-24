@@ -25,7 +25,6 @@ impl Fd {
         if value < 0 {
             return Err(Error::InvalidDescriptor);
         }
-
         Ok(Fd(value))
     }
 
@@ -37,66 +36,6 @@ impl Fd {
         }
     }
 }
-
-// impl Read for Fd {
-//     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-//         unsafe {
-//             let amount = libc::read(self.0, buf.as_mut_ptr() as *mut _, buf.len());
-
-//             if amount < 0 {
-//                 return Err(io::Error::last_os_error());
-//             }
-
-//             Ok(amount as usize)
-//         }
-//     }
-
-//     fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut<'_>]) -> io::Result<usize> {
-//         unsafe {
-//             let iov = bufs.as_ptr().cast();
-//             let iovcnt = bufs.len().min(libc::c_int::MAX as usize) as _;
-
-//             let n = libc::readv(self.0, iov, iovcnt);
-//             if n < 0 {
-//                 return Err(io::Error::last_os_error());
-//             }
-
-//             Ok(n as usize)
-//         }
-//     }
-// }
-
-// impl Write for Fd {
-//     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-//         unsafe {
-//             let amount = libc::write(self.0, buf.as_ptr() as *const _, buf.len());
-
-//             if amount < 0 {
-//                 return Err(io::Error::last_os_error());
-//             }
-
-//             Ok(amount as usize)
-//         }
-//     }
-
-//     fn flush(&mut self) -> io::Result<()> {
-//         Ok(())
-//     }
-
-//     fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
-//         unsafe {
-//             let iov = bufs.as_ptr().cast();
-//             let iovcnt = bufs.len().min(libc::c_int::MAX as usize) as _;
-
-//             let n = libc::writev(self.0, iov, iovcnt);
-//             if n < 0 {
-//                 return Err(io::Error::last_os_error());
-//             }
-
-//             Ok(n as usize)
-//         }
-//     }
-// }
 
 impl AsRawFd for Fd {
     fn as_raw_fd(&self) -> RawFd {
