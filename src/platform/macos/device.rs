@@ -57,11 +57,12 @@ impl AsMut<dyn AbstractDevice<Queue = Tun> + 'static> for Device {
 impl Device {
     /// Create a new `Device` for the given `Configuration`.
     pub fn new(config: &Configuration) -> Result<Self> {
+        let mtu = config.mtu.unwrap_or(1500);
         if let Some(fd) = config.raw_fd {
             let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
             let device = Device {
                 name: None,
-                tun: Tun::new(tun),
+                tun: Tun::new(tun, mtu, true),
                 ctl: None,
             };
             return Ok(device);
@@ -139,7 +140,7 @@ impl Device {
                         .to_string_lossy()
                         .into(),
                 ),
-                tun: Tun::new(tun),
+                tun: Tun::new(tun, mtu, true),
                 ctl,
             }
         };
@@ -392,7 +393,7 @@ impl AbstractDevice for Device {
             if siocsifmtu(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-
+            self.tun.set_mtu(value);
             Ok(())
         }
     }

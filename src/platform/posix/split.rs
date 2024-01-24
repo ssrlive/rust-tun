@@ -18,7 +18,10 @@ use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 use std::sync::Arc;
 
 use crate::platform::posix::Fd;
+use bytes::BufMut;
 use libc;
+
+use crate::PACKET_INFORMATION_LENGTH;
 
 /// Read-only end for a file descriptor.
 pub struct Reader(pub(crate) Arc<Fd>);
@@ -107,24 +110,56 @@ impl AsRawFd for Writer {
 pub struct Tun {
     pub(crate) reader: Reader,
     pub(crate) writer: Writer,
+    pub(crate) mtu: usize,
+    pub(crate) packet_information: bool,
+    pub(crate) buf: Vec<u8>,
 }
 
 impl Tun {
-    pub fn new(fd: Fd) -> Self {
+    pub fn new(fd: Fd, mtu: usize, packet_information: bool) -> Self {
         let fd = Arc::new(fd);
         Self {
             reader: Reader(fd.clone()),
             writer: Writer(fd),
+            mtu,
+            packet_information,
+            buf: vec![
+                0;
+                mtu + if packet_information {
+                    PACKET_INFORMATION_LENGTH
+                } else {
+                    0
+                }
+            ],
         }
     }
     pub fn set_nonblock(&self) -> io::Result<()> {
         self.reader.0.set_nonblock()
     }
+    pub fn set_mtu(&mut self, value: usize) {
+        self.mtu = value;
+        self.buf.reserve(
+            value
+                + if self.packet_information {
+                    PACKET_INFORMATION_LENGTH
+                } else {
+                    0
+                },
+        );
+    }
 }
 
 impl Read for Tun {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        self.reader.read(buf)
+    fn read(&mut self, mut buf: &mut [u8]) -> io::Result<usize> {
+        let slice = &mut self.buf[..];
+        let size = self.reader.read(slice)?;
+        let packet_pos = if self.packet_information {
+            PACKET_INFORMATION_LENGTH
+        } else {
+            0
+        };
+        buf.put_slice(&self.buf[packet_pos..size]);
+        Ok(size - packet_pos)
     }
 
     fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut<'_>]) -> io::Result<usize> {
@@ -153,12 +188,12 @@ impl AsRawFd for Tun {
 
 impl IntoRawFd for Tun {
     fn into_raw_fd(self) -> RawFd {
-        let mut fd = self.reader.0.clone();
-        let raw_fd = fd.as_raw_fd();
+        let fd = self.reader.0.clone();
+        let mut raw_fd = fd.as_raw_fd();
         drop(self.reader);
         drop(self.writer);
-        if let Some(fd) = Arc::get_mut(&mut fd) {
-            fd.0 = -1;
+        if let Some(fd) = Arc::into_inner(fd) {
+            raw_fd = fd.into_raw_fd();
         }
         raw_fd
     }
