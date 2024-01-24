@@ -191,6 +191,7 @@ impl IntoRawFd for Tun {
         let fd = self.reader.0.clone();
         drop(self.reader);
         drop(self.writer);
+        // guarantee fd is the unique owner such that Arc::into_inner can return some
         let fd = Arc::into_inner(fd).unwrap(); //panic if accident
         fd.into_raw_fd()
     }
