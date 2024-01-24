@@ -189,12 +189,9 @@ impl AsRawFd for Tun {
 impl IntoRawFd for Tun {
     fn into_raw_fd(self) -> RawFd {
         let fd = self.reader.0.clone();
-        let mut raw_fd = fd.as_raw_fd();
         drop(self.reader);
         drop(self.writer);
-        if let Some(fd) = Arc::into_inner(fd) {
-            raw_fd = fd.into_raw_fd();
-        }
-        raw_fd
+        let fd = Arc::into_inner(fd).unwrap(); //panic if accident
+        fd.into_raw_fd()
     }
 }
