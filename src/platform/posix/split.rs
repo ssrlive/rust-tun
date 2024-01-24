@@ -154,11 +154,12 @@ impl AsRawFd for Tun {
 impl IntoRawFd for Tun {
     fn into_raw_fd(self) -> RawFd {
         let mut fd = self.reader.0.clone();
+        let raw_fd = fd.as_raw_fd();
         drop(self.reader);
         drop(self.writer);
         if let Some(fd) = Arc::get_mut(&mut fd) {
             fd.0 = -1;
         }
-        fd.as_raw_fd()
+        raw_fd
     }
 }
