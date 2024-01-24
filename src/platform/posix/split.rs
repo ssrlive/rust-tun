@@ -14,7 +14,7 @@
 
 use std::io::{self, Read, Write};
 use std::mem;
-use std::os::unix::io::{AsRawFd, RawFd};
+use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 use std::sync::Arc;
 
 use crate::platform::posix::Fd;
@@ -101,5 +101,64 @@ impl AsRawFd for Reader {
 impl AsRawFd for Writer {
     fn as_raw_fd(&self) -> RawFd {
         self.0.as_raw_fd()
+    }
+}
+
+pub struct Tun {
+    pub(crate) reader: Reader,
+    pub(crate) writer: Writer,
+}
+
+impl Tun {
+    pub fn new(fd: Fd) -> Self {
+        let fd = Arc::new(fd);
+        Self {
+            reader: Reader(fd.clone()),
+            writer: Writer(fd),
+        }
+    }
+    pub fn set_nonblock(&self) -> io::Result<()> {
+        self.reader.0.set_nonblock()
+    }
+}
+
+impl Read for Tun {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
+        self.reader.read(buf)
+    }
+
+    fn read_vectored(&mut self, bufs: &mut [io::IoSliceMut<'_>]) -> io::Result<usize> {
+        self.reader.read_vectored(bufs)
+    }
+}
+
+impl Write for Tun {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.writer.write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.writer.flush()
+    }
+
+    fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
+        self.writer.write_vectored(bufs)
+    }
+}
+impl AsRawFd for Tun {
+    fn as_raw_fd(&self) -> RawFd {
+        self.reader.as_raw_fd()
+    }
+}
+
+impl IntoRawFd for Tun {
+    fn into_raw_fd(self) -> RawFd {
+        let mut fd = self.reader.0.clone();
+        drop(self.reader);
+        drop(self.writer);
+        if let Some(fd) = Arc::get_mut(&mut fd) {
+            fd.0 = -1;
+        }
+        fd.as_raw_fd()
     }
 }

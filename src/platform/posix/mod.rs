@@ -21,4 +21,4 @@ mod fd;
 pub use self::fd::Fd;
 
 mod split;
-pub use self::split::{Reader, Writer};
+pub use self::split::{Reader, Tun, Writer};
