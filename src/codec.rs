@@ -17,7 +17,7 @@ use bytes::{BufMut, Bytes, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
 
 /// Infer the protocol based on the first nibble in the packet buffer.
-fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
+pub(crate) fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
     use std::io::{Error, ErrorKind::InvalidData};
     if buf.is_empty() {
         return Err(Error::new(InvalidData, "Zero-length data"));
@@ -29,7 +29,7 @@ fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
     }
 }
 
-fn generate_packet_information(_packet_information: bool, _ipv6: bool) -> Option<Bytes> {
+pub(crate) fn generate_packet_information(_packet_information: bool, _ipv6: bool) -> Option<Bytes> {
     #[cfg(any(target_os = "linux", target_os = "android"))]
     const TUN_PROTO_IP6: [u8; PACKET_INFORMATION_LENGTH] = (libc::ETH_P_IPV6 as u32).to_be_bytes();
     #[cfg(any(target_os = "linux", target_os = "android"))]
@@ -60,7 +60,7 @@ pub struct TunPacketCodec {
     pub(crate) packet_information: bool,
 
     /// The MTU of the underlying tunnel Device.
-    pub(crate) mtu: usize,
+    pub(crate) _mtu: usize,
 }
 
 impl TunPacketCodec {
@@ -70,7 +70,7 @@ impl TunPacketCodec {
         let mtu = u16::try_from(mtu).unwrap_or(crate::DEFAULT_MTU as u16) as usize;
         TunPacketCodec {
             packet_information,
-            mtu,
+            _mtu: mtu,
         }
     }
 }
@@ -84,23 +84,7 @@ impl Decoder for TunPacketCodec {
             return Ok(None);
         }
 
-        let mut pkt = buf.split_to(buf.len());
-
-        if self.packet_information {
-            // reserve enough space for the next packet
-            buf.reserve(self.mtu + PACKET_INFORMATION_LENGTH);
-
-            // if the packet information is enabled we have to ignore the first 4 bytes
-            let header = pkt.split_to(PACKET_INFORMATION_LENGTH);
-            let _ipv6 = is_ipv6(pkt.as_ref())?;
-            let _header = generate_packet_information(true, _ipv6).unwrap();
-            if header != _header {
-                use std::io::{Error, ErrorKind::InvalidData};
-                return Err(Error::new(InvalidData, "Invalid packet information header"));
-            }
-        } else {
-            buf.reserve(self.mtu);
-        }
+        let pkt = buf.split_to(buf.len());
 
         let bytes = pkt.freeze();
         Ok(Some(bytes.into()))
@@ -114,9 +98,6 @@ impl Encoder<Vec<u8>> for TunPacketCodec {
         let bytes = item.as_slice();
         if self.packet_information {
             dst.reserve(bytes.len() + PACKET_INFORMATION_LENGTH);
-            if let Some(header) = generate_packet_information(true, is_ipv6(bytes)?) {
-                dst.put_slice(header.as_ref());
-            }
         } else {
             dst.reserve(bytes.len());
         }
