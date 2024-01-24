@@ -55,23 +55,13 @@ pub(crate) fn generate_packet_information(_packet_information: bool, _ipv6: bool
 
 /// A TUN packet Encoder/Decoder.
 #[derive(Debug, Default)]
-pub struct TunPacketCodec {
-    /// Whether the underlying tunnel Device has enabled the packet information header.
-    pub(crate) packet_information: bool,
-
-    /// The MTU of the underlying tunnel Device.
-    pub(crate) _mtu: usize,
-}
+pub struct TunPacketCodec;
 
 impl TunPacketCodec {
     /// Create a new `TunPacketCodec` specifying whether the underlying
     ///  tunnel Device has enabled the packet information header.
-    pub fn new(packet_information: bool, mtu: usize) -> TunPacketCodec {
-        let mtu = u16::try_from(mtu).unwrap_or(crate::DEFAULT_MTU as u16) as usize;
-        TunPacketCodec {
-            packet_information,
-            _mtu: mtu,
-        }
+    pub fn new() -> TunPacketCodec {
+        TunPacketCodec
     }
 }
 
@@ -94,11 +84,7 @@ impl Encoder<Vec<u8>> for TunPacketCodec {
 
     fn encode(&mut self, item: Vec<u8>, dst: &mut BytesMut) -> Result<(), Self::Error> {
         let bytes = item.as_slice();
-        if self.packet_information {
-            dst.reserve(bytes.len() + PACKET_INFORMATION_LENGTH);
-        } else {
-            dst.reserve(bytes.len());
-        }
+        dst.reserve(bytes.len());
         dst.put(bytes);
         Ok(())
     }
