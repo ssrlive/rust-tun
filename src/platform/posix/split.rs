@@ -78,24 +78,33 @@ impl Reader {
 
 impl Read for Reader {
     fn read(&mut self, mut buf: &mut [u8]) -> io::Result<usize> {
-        let fd = self.fd.as_raw_fd();
-        if self.offset != 0 {
-            let new_len = buf.len() + self.offset;
-            self.buf.resize(new_len, 0);
-            let amount = unsafe { libc::read(fd, self.buf.as_mut_ptr() as *mut _, new_len) };
+        unsafe {
+            let either_buf = if self.offset != 0 {
+                &mut self.buf[..]
+            } else {
+                &mut *buf
+            };
+            let amount = libc::read(
+                self.fd.as_raw_fd(),
+                either_buf.as_mut_ptr() as *mut _,
+                either_buf.len(),
+            );
+
             if amount < 0 {
                 return Err(io::Error::last_os_error());
             }
             let amount = amount as usize;
-            buf.put_slice(&self.buf[self.offset..amount]);
-            Ok(amount - self.offset)
-        } else {
-            let len = buf.len();
-            let amount = unsafe { libc::read(fd, buf.as_mut_ptr() as *mut _, len) };
-            if amount < 0 {
-                return Err(io::Error::last_os_error());
+            if self.offset != 0 {
+                let need_len = amount - self.offset;
+                if buf.len() < need_len {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::OutOfMemory,
+                        format!("required buf to have at least {need_len} size"),
+                    ));
+                }
+                buf.put_slice(&self.buf[self.offset..amount]);
             }
-            Ok(amount as usize)
+            Ok(amount - self.offset)
         }
     }
 }
