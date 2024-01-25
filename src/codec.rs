@@ -11,7 +11,7 @@
 //   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
-use bytes::{BufMut, Bytes, BytesMut};
+use bytes::{BufMut, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
 
 /// A TUN packet Encoder/Decoder.
