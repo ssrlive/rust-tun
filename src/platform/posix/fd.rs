@@ -18,6 +18,7 @@ use std::io;
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 
 /// POSIX file descriptor support for `io` traits.
+#[repr(transparent)]
 pub(crate) struct Fd(pub(crate) RawFd);
 
 impl Fd {
