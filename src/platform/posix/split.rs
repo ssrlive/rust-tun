@@ -12,15 +12,12 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use crate::platform::posix::Fd;
+use crate::PACKET_INFORMATION_LENGTH as PIL;
+use bytes::{BufMut, Bytes};
 use std::io::{self, Read, Write};
-
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 use std::sync::Arc;
-
-use crate::platform::posix::Fd;
-use bytes::{BufMut, Bytes};
-
-use crate::PACKET_INFORMATION_LENGTH as PIL;
 
 /// Infer the protocol based on the first nibble in the packet buffer.
 pub(crate) fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
@@ -116,8 +113,8 @@ impl Writer {
 impl Write for Writer {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         let buf = if self.offset != 0 {
-            let ipv6 = crate::codec::is_ipv6(buf)?;
-            if let Some(header) = crate::codec::generate_packet_information(true, ipv6) {
+            let ipv6 = is_ipv6(buf)?;
+            if let Some(header) = generate_packet_information(true, ipv6) {
                 (&mut self.buf[..self.offset]).put_slice(header.as_ref());
                 let len = self.offset + buf.len();
                 (&mut self.buf[self.offset..len]).put_slice(buf);
