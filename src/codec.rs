@@ -11,7 +11,7 @@
 //   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
-#[cfg(not(target_os="windows"))]
+#[cfg(not(target_os = "windows"))]
 use crate::PACKET_INFORMATION_LENGTH;
 use bytes::{BufMut, Bytes, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
