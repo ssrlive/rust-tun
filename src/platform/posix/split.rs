@@ -186,6 +186,10 @@ impl Tun {
         self.writer.set_mtu(value);
     }
 
+    pub fn mtu(&self) -> usize {
+        self.info.mtu
+    }
+
     pub fn packet_information(&self) -> bool {
         self.info.packet_information
     }

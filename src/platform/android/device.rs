@@ -134,10 +134,11 @@ impl AbstractDevice for Device {
     }
 
     fn mtu(&self) -> Result<usize> {
-        Err(Error::NotImplemented)
+        Ok(self.tun.mtu())
     }
 
     fn set_mtu(&mut self, value: usize) -> Result<()> {
+        self.tun.set_mtu(value);
         Ok(())
     }
 
