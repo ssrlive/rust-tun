@@ -182,7 +182,7 @@ impl AbstractDevice for Device {
         Ok(())
     }
 
-    fn device_io(&mut self, _index: usize) -> Option<&mut Self::IO> {
+    fn device_io(&mut self) -> Option<&mut Self::IO> {
         Some(&mut self.tun)
     }
 

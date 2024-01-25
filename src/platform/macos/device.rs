@@ -390,11 +390,7 @@ impl AbstractDevice for Device {
         }
     }
 
-    fn device_io(&mut self, index: usize) -> Option<&mut Self::IO> {
-        if index > 0 {
-            return None;
-        }
-
+    fn device_io(&mut self) -> Option<&mut Self::IO> {
         Some(&mut self.tun)
     }
 
