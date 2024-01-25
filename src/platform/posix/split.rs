@@ -80,7 +80,7 @@ impl Read for Reader {
     fn read(&mut self, mut buf: &mut [u8]) -> io::Result<usize> {
         unsafe {
             let either_buf = if self.offset != 0 {
-                self.buf.resize(buf.len(), 0u8);
+                self.buf.resize(buf.len() + self.offset, 0u8);
                 &mut self.buf[..]
             } else {
                 &mut *buf
