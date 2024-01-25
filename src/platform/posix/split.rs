@@ -32,7 +32,10 @@ pub(crate) fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
     }
 }
 
-pub(crate) fn generate_packet_information(_packet_information: bool, _ipv6: bool) -> Option<Bytes> {
+pub(crate) fn generate_packet_information(
+    _packet_information: bool,
+    _ipv6: bool,
+) -> Option<[u8; PIL]> {
     #[cfg(any(target_os = "linux", target_os = "android"))]
     const TUN_PROTO_IP6: [u8; PIL] = (libc::ETH_P_IPV6 as u32).to_be_bytes();
     #[cfg(any(target_os = "linux", target_os = "android"))]
@@ -45,13 +48,11 @@ pub(crate) fn generate_packet_information(_packet_information: bool, _ipv6: bool
 
     #[cfg(unix)]
     if _packet_information {
-        let mut buf = BytesMut::with_capacity(PIL);
         if _ipv6 {
-            buf.put_slice(&TUN_PROTO_IP6);
+            Some(TUN_PROTO_IP6)
         } else {
-            buf.put_slice(&TUN_PROTO_IP4);
+            Some(TUN_PROTO_IP4)
         }
-        return Some(buf.freeze());
     }
     None
 }
