@@ -80,6 +80,7 @@ impl Read for Reader {
     fn read(&mut self, mut buf: &mut [u8]) -> io::Result<usize> {
         unsafe {
             let either_buf = if self.offset != 0 {
+                self.buf.resize(buf.len(), 0u8);
                 &mut self.buf[..]
             } else {
                 &mut *buf
@@ -95,13 +96,6 @@ impl Read for Reader {
             }
             let amount = amount as usize;
             if self.offset != 0 {
-                let need_len = amount - self.offset;
-                if buf.len() < need_len {
-                    return Err(std::io::Error::new(
-                        std::io::ErrorKind::OutOfMemory,
-                        format!("required buf to have at least {need_len} size"),
-                    ));
-                }
                 buf.put_slice(&self.buf[self.offset..amount]);
             }
             Ok(amount - self.offset)
