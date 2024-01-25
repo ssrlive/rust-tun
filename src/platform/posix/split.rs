@@ -49,9 +49,9 @@ pub(crate) fn generate_packet_information(
     #[cfg(unix)]
     if _packet_information {
         if _ipv6 {
-            Some(TUN_PROTO_IP6)
+            return Some(TUN_PROTO_IP6);
         } else {
-            Some(TUN_PROTO_IP4)
+            return Some(TUN_PROTO_IP4);
         }
     }
     None
