@@ -14,48 +14,6 @@
 use bytes::{BufMut, Bytes, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
 
-#[allow(dead_code)]
-/// Infer the protocol based on the first nibble in the packet buffer.
-pub(crate) fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
-    use std::io::{Error, ErrorKind::InvalidData};
-    if buf.is_empty() {
-        return Err(Error::new(InvalidData, "Zero-length data"));
-    }
-    match buf[0] >> 4 {
-        4 => Ok(false),
-        6 => Ok(true),
-        p => Err(Error::new(InvalidData, format!("IP version {}", p))),
-    }
-}
-
-#[allow(dead_code)]
-pub(crate) fn generate_packet_information(_packet_information: bool, _ipv6: bool) -> Option<Bytes> {
-    #[cfg(unix)]
-    use crate::PACKET_INFORMATION_LENGTH as PIL;
-
-    #[cfg(any(target_os = "linux", target_os = "android"))]
-    const TUN_PROTO_IP6: [u8; PIL] = (libc::ETH_P_IPV6 as u32).to_be_bytes();
-    #[cfg(any(target_os = "linux", target_os = "android"))]
-    const TUN_PROTO_IP4: [u8; PIL] = (libc::ETH_P_IP as u32).to_be_bytes();
-
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    const TUN_PROTO_IP6: [u8; PIL] = (libc::AF_INET6 as u32).to_be_bytes();
-    #[cfg(any(target_os = "macos", target_os = "ios"))]
-    const TUN_PROTO_IP4: [u8; PIL] = (libc::AF_INET as u32).to_be_bytes();
-
-    #[cfg(unix)]
-    if _packet_information {
-        let mut buf = BytesMut::with_capacity(PIL);
-        if _ipv6 {
-            buf.put_slice(&TUN_PROTO_IP6);
-        } else {
-            buf.put_slice(&TUN_PROTO_IP4);
-        }
-        return Some(buf.freeze());
-    }
-    None
-}
-
 /// A TUN packet Encoder/Decoder.
 #[derive(Debug, Default)]
 pub struct TunPacketCodec;
