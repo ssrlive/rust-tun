@@ -14,7 +14,7 @@
 
 use crate::platform::posix::Fd;
 use crate::PACKET_INFORMATION_LENGTH as PIL;
-use bytes::{BufMut, Bytes, BytesMut};
+use bytes::BufMut;
 use std::io::{self, Read, Write};
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 use std::sync::Arc;
