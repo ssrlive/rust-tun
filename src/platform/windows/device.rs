@@ -177,9 +177,9 @@ impl AbstractDevice for Device {
         Ok(self.mtu)
     }
 
-    /// always fail due to mtu of wintun is always 65535
+    /// no-op due to mtu of wintun is always 65535
     fn set_mtu(&mut self, _: usize) -> Result<()> {
-        Err(Error::InvalidConfig)
+        Ok(())
     }
 
     fn device_io(&mut self) -> Option<&mut Self::IO> {
