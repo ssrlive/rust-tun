@@ -16,6 +16,7 @@ use crate::PACKET_INFORMATION_LENGTH;
 use bytes::{BufMut, Bytes, BytesMut};
 use tokio_util::codec::{Decoder, Encoder};
 
+#[allow(dead_code)]
 /// Infer the protocol based on the first nibble in the packet buffer.
 pub(crate) fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
     use std::io::{Error, ErrorKind::InvalidData};
@@ -29,6 +30,7 @@ pub(crate) fn is_ipv6(buf: &[u8]) -> std::io::Result<bool> {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) fn generate_packet_information(_packet_information: bool, _ipv6: bool) -> Option<Bytes> {
     #[cfg(any(target_os = "linux", target_os = "android"))]
     const TUN_PROTO_IP6: [u8; PACKET_INFORMATION_LENGTH] = (libc::ETH_P_IPV6 as u32).to_be_bytes();

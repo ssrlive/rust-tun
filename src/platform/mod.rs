@@ -40,7 +40,7 @@ pub use self::android::{create, Device, PlatformConfig, Queue};
 #[cfg(target_os = "windows")]
 pub mod windows;
 #[cfg(target_os = "windows")]
-pub use self::windows::{create, Device, PlatformConfig, Queue};
+pub use self::windows::{create, Device, PlatformConfig};
 
 #[cfg(test)]
 mod test {
