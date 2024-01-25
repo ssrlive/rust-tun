@@ -41,14 +41,14 @@ pub struct Device {
     packet_information: bool,
 }
 
-impl AsRef<dyn AbstractDevice<Queue = Tun> + 'static> for Device {
-    fn as_ref(&self) -> &(dyn AbstractDevice<Queue = Tun> + 'static) {
+impl AsRef<dyn AbstractDevice<IO = Tun> + 'static> for Device {
+    fn as_ref(&self) -> &(dyn AbstractDevice<IO = Tun> + 'static) {
         self
     }
 }
 
-impl AsMut<dyn AbstractDevice<Queue = Tun> + 'static> for Device {
-    fn as_mut(&mut self) -> &mut (dyn AbstractDevice<Queue = Tun> + 'static) {
+impl AsMut<dyn AbstractDevice<IO = Tun> + 'static> for Device {
+    fn as_mut(&mut self) -> &mut (dyn AbstractDevice<IO = Tun> + 'static) {
         self
     }
 }
@@ -209,7 +209,7 @@ impl Write for Device {
 }
 
 impl AbstractDevice for Device {
-    type Queue = Tun;
+    type IO = Tun;
 
     fn name(&self) -> Result<String> {
         Ok(self.name.clone())
@@ -387,7 +387,7 @@ impl AbstractDevice for Device {
         }
     }
 
-    fn queue(&mut self, _index: usize) -> Option<&mut Self::Queue> {
+    fn device_io(&mut self, _index: usize) -> Option<&mut Self::IO> {
         Some(&mut self.tun)
     }
 
@@ -407,8 +407,6 @@ impl IntoRawFd for Device {
         self.tun.into_raw_fd()
     }
 }
-
-pub struct Queue;
 
 impl From<Layer> for c_short {
     fn from(layer: Layer) -> Self {

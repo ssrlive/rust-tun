@@ -42,14 +42,14 @@ pub struct Device {
     ctl: Option<Fd>,
 }
 
-impl AsRef<dyn AbstractDevice<Queue = Tun> + 'static> for Device {
-    fn as_ref(&self) -> &(dyn AbstractDevice<Queue = Tun> + 'static) {
+impl AsRef<dyn AbstractDevice<IO = Tun> + 'static> for Device {
+    fn as_ref(&self) -> &(dyn AbstractDevice<IO = Tun> + 'static) {
         self
     }
 }
 
-impl AsMut<dyn AbstractDevice<Queue = Tun> + 'static> for Device {
-    fn as_mut(&mut self) -> &mut (dyn AbstractDevice<Queue = Tun> + 'static) {
+impl AsMut<dyn AbstractDevice<IO = Tun> + 'static> for Device {
+    fn as_mut(&mut self) -> &mut (dyn AbstractDevice<IO = Tun> + 'static) {
         self
     }
 }
@@ -221,7 +221,7 @@ impl Write for Device {
 }
 
 impl AbstractDevice for Device {
-    type Queue = Tun;
+    type IO = Tun;
 
     fn name(&self) -> Result<String> {
         self.name.as_ref().cloned().ok_or(Error::InvalidConfig)
@@ -390,7 +390,7 @@ impl AbstractDevice for Device {
         }
     }
 
-    fn queue(&mut self, index: usize) -> Option<&mut Self::Queue> {
+    fn device_io(&mut self, index: usize) -> Option<&mut Self::IO> {
         if index > 0 {
             return None;
         }
@@ -415,5 +415,3 @@ impl IntoRawFd for Device {
         self.tun.into_raw_fd()
     }
 }
-
-pub struct Queue;
