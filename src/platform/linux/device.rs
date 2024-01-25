@@ -382,7 +382,7 @@ impl AbstractDevice for Device {
             if siocsifmtu(self.ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-
+            self.tun.set_mtu(value);
             Ok(())
         }
     }
