@@ -138,6 +138,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_mtu(&mut self, value: usize) -> Result<()> {
+        // TODO: must set the mtu to the underlying device driver
         self.tun.set_mtu(value);
         Ok(())
     }
