@@ -118,7 +118,9 @@ impl AbstractDevice for Device {
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-        let IpAddr::V4(value) = value else{unimplemented!("do not support IPv6 yet")};
+        let IpAddr::V4(value) = value else {
+            unimplemented!("do not support IPv6 yet")
+        };
         self.tun.session.get_adapter().set_address(value)?;
         Ok(())
     }
@@ -136,7 +138,9 @@ impl AbstractDevice for Device {
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-        let IpAddr::V4(value) = value else{unimplemented!("do not support IPv6 yet")};
+        let IpAddr::V4(value) = value else {
+            unimplemented!("do not support IPv6 yet")
+        };
         // It's just set the default gateway in windows.
         self.tun.session.get_adapter().set_gateway(Some(value))?;
         Ok(())
@@ -161,7 +165,9 @@ impl AbstractDevice for Device {
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-        let IpAddr::V4(value) = value else{unimplemented!("do not support IPv6 yet")};
+        let IpAddr::V4(value) = value else {
+            unimplemented!("do not support IPv6 yet")
+        };
         self.tun.session.get_adapter().set_netmask(value)?;
         Ok(())
     }
