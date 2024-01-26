@@ -114,7 +114,13 @@ impl AbstractDevice for Device {
 
     fn address(&self) -> Result<IpAddr> {
         let addresses = self.tun.session.get_adapter().get_addresses()?;
-        addresses.iter().copied().next().ok_or(Error::InvalidConfig)
+        addresses
+            .iter()
+            .find_map(|a| match a {
+                std::net::IpAddr::V4(a) => Some(std::net::IpAddr::V4(*a)),
+                _ => None,
+            })
+            .ok_or(Error::InvalidConfig)
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
@@ -132,8 +138,10 @@ impl AbstractDevice for Device {
             .get_adapter()
             .get_gateways()?
             .iter()
-            .copied()
-            .next()
+            .find_map(|a| match a {
+                std::net::IpAddr::V4(a) => Some(std::net::IpAddr::V4(*a)),
+                _ => None,
+            })
             .ok_or(Error::InvalidConfig)
     }
 
