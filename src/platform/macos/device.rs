@@ -178,13 +178,13 @@ impl Device {
     /// Set the IPv4 alias of the device.
     pub fn set_alias(&mut self, addr: IpAddr, broadaddr: IpAddr, mask: IpAddr) -> Result<()> {
         let IpAddr::V4(addr) = addr else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let IpAddr::V4(broadaddr) = broadaddr else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let IpAddr::V4(mask) = mask else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let name = self.name.as_ref().ok_or(Error::InvalidConfig)?;
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
@@ -285,7 +285,7 @@ impl AbstractDevice for Device {
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
@@ -317,7 +317,7 @@ impl AbstractDevice for Device {
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
@@ -349,7 +349,7 @@ impl AbstractDevice for Device {
 
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
@@ -381,7 +381,7 @@ impl AbstractDevice for Device {
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {

@@ -276,7 +276,7 @@ impl AbstractDevice for Device {
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         unsafe {
             let mut req = self.request();
@@ -306,7 +306,7 @@ impl AbstractDevice for Device {
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         unsafe {
             let mut req = self.request();
@@ -336,7 +336,7 @@ impl AbstractDevice for Device {
 
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         unsafe {
             let mut req = self.request();
@@ -366,7 +366,7 @@ impl AbstractDevice for Device {
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
-            unimplemented!()
+            unimplemented!("do not support IPv6 yet")
         };
         unsafe {
             let mut req = self.request();
