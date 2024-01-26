@@ -30,7 +30,7 @@ use std::{
     ffi::CStr,
     io::{self, Read, Write},
     mem,
-    net::{Ipv4Addr,IpAddr},
+    net::{IpAddr, Ipv4Addr},
     os::unix::io::{AsRawFd, IntoRawFd, RawFd},
     ptr,
 };
@@ -147,9 +147,15 @@ impl Device {
 
         device.configure(config)?;
         device.set_alias(
-            config.address.unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
-            config.destination.unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
-            config.netmask.unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
+            config
+                .address
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
+            config
+                .destination
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
+            config
+                .netmask
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
         )?;
 
         Ok(device)
@@ -171,9 +177,15 @@ impl Device {
 
     /// Set the IPv4 alias of the device.
     pub fn set_alias(&mut self, addr: IpAddr, broadaddr: IpAddr, mask: IpAddr) -> Result<()> {
-		let IpAddr::V4(addr) = addr else{unimplemented!()};
-		let IpAddr::V4(broadaddr) = broadaddr else{unimplemented!()};
-		let IpAddr::V4(mask) = mask else{unimplemented!()};
+        let IpAddr::V4(addr) = addr else {
+            unimplemented!()
+        };
+        let IpAddr::V4(broadaddr) = broadaddr else {
+            unimplemented!()
+        };
+        let IpAddr::V4(mask) = mask else {
+            unimplemented!()
+        };
         let name = self.name.as_ref().ok_or(Error::InvalidConfig)?;
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
@@ -265,12 +277,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-			Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_addr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_addr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
@@ -293,12 +309,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-            Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_dstaddr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_dstaddr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
@@ -321,12 +341,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-            Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_broadaddr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_broadaddr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
@@ -349,12 +373,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-			Ok(IpAddr::V4(SockAddr::unchecked(&req.ifr_ifru.ifru_addr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::unchecked(&req.ifr_ifru.ifru_addr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;

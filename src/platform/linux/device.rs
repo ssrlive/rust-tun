@@ -268,12 +268,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-            Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_addr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_addr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
@@ -294,12 +298,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-			Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_dstaddr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_dstaddr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_dstaddr = SockAddr::from(value).into();
@@ -320,12 +328,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-            Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_broadaddr).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_broadaddr).map(Into::into)?,
+            ))
         }
     }
 
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_broadaddr = SockAddr::from(value).into();
@@ -346,12 +358,16 @@ impl AbstractDevice for Device {
                 return Err(io::Error::last_os_error().into());
             }
 
-            Ok(IpAddr::V4(SockAddr::new(&req.ifr_ifru.ifru_netmask).map(Into::into)?))
+            Ok(IpAddr::V4(
+                SockAddr::new(&req.ifr_ifru.ifru_netmask).map(Into::into)?,
+            ))
         }
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-		let IpAddr::V4(value) = value else{unimplemented!()};
+        let IpAddr::V4(value) = value else {
+            unimplemented!()
+        };
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_netmask = SockAddr::from(value).into();
