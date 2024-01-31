@@ -53,7 +53,7 @@ fn main() {
 
     #[cfg(target_os = "linux")]
     config.platform_config(|config| {
-        config.packet_information(true);
+        // requiring root privilege to acquire complete functions
         config.ensure_root_privileges(true);
     });
 
@@ -122,4 +122,4 @@ pub extern "C" fn start_tun(fd: std::os::raw::c_int) {
 Windows
 -----
 You need to copy the [wintun.dll](https://wintun.net/) file which matches your architecture to 
-the same directory as your executable and run you program as administrator.
+the same directory as your executable and run your program as administrator.
