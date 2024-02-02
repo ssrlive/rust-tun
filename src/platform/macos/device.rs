@@ -22,6 +22,7 @@ use crate::{
         posix::{self, Fd, SockAddr, Tun},
     },
 };
+use cidr_util::Cidr;
 use libc::{
     self, c_char, c_short, c_uint, c_void, sockaddr, socklen_t, AF_INET, AF_SYSTEM, AF_SYS_CONTROL,
     IFF_RUNNING, IFF_UP, IFNAMSIZ, PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL, UTUN_OPT_IFNAME,
@@ -236,12 +237,15 @@ impl Device {
 
     fn set_route(&mut self, route: Route) -> Result<()> {
         if let Some(v) = &self.route {
-            let prefix = crate::netmask2prefix(v.netmask);
-            let start_ip = crate::startip_from_cidr(v.addr, prefix);
-            let c = format!("sudo route -n delete -net {}/{prefix} {}", start_ip, v.dest);
+            let prefix_len = v.netmask.to_prefix_len();
+            let (start_ip, _) = v.addr.ip_range(v.netmask.to_prefix_len());
+            let c = format!(
+                "sudo route -n delete -net {}/{prefix_len} {}",
+                start_ip, v.dest
+            );
             run_command(c)?;
         }
-        let prefix = crate::netmask2prefix(route.netmask);
+        let prefix = route.netmask.to_prefix_len();
         let c = format!(
             "sudo route -n add -net {}/{prefix} {}",
             route.addr, route.dest
