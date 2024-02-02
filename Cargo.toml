@@ -37,6 +37,7 @@ cidr_util = "0.1.0"
 
 [dev-dependencies]
 ctrlc2 = { version = "3.5", features = ["tokio", "termination"] }
+env_logger = "0.11"
 futures = "0.3"
 packet = "0.1"
 tokio = { version = "1", features = ["rt-multi-thread"] }
