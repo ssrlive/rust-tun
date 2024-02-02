@@ -13,6 +13,8 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 mod error;
+use std::net::Ipv4Addr;
+
 pub use crate::error::{BoxError, Error, Result};
 
 mod address;
@@ -42,3 +44,21 @@ pub const DEFAULT_MTU: u16 = 1500;
 pub const DEFAULT_MTU: u16 = 0xFFFF; // 65535
 
 pub const PACKET_INFORMATION_LENGTH: usize = 4;
+
+pub fn netmask2prefix(netmask: Ipv4Addr) -> u32 {
+    let mut n = u32::from_be_bytes(netmask.octets());
+    let mut i = 0;
+    while n > 0 {
+        if n & 0x1 != 0 {
+            i += 1;
+        }
+        n >>= 1;
+    }
+    i
+}
+
+pub fn startip_from_cidr(ip: Ipv4Addr, prefix: u32) -> Ipv4Addr {
+    let mask = !(0xFFFFFFFFu32 >> prefix);
+    let n = u32::from_be_bytes(ip.octets());
+    Ipv4Addr::from((n & mask).to_be_bytes())
+}
