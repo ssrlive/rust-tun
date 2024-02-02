@@ -214,12 +214,13 @@ impl Device {
             if siocaifaddr(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if let Err(e) = self.set_route(Route {
+            let route = Route {
                 addr,
                 netmask: mask,
                 dest: broadaddr,
-            }) {
-                log::trace!("{e:?}");
+            };
+            if let Err(e) = self.set_route(route) {
+                log::warn!("{e:?}");
             }
             Ok(())
         }
@@ -332,16 +333,8 @@ impl AbstractDevice for Device {
             if siocsifaddr(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if self.route.is_some() {
-                let netmask = self.route.as_ref().unwrap().netmask;
-                let dest = self.route.as_ref().unwrap().dest;
-                if let Err(e) = self.set_route(Route {
-                    addr: value,
-                    netmask,
-                    dest,
-                }) {
-                    log::trace!("{e:?}");
-                }
+            if let Some(ref mut route) = &mut self.route {
+                route.addr = value;
             }
             Ok(())
         }
@@ -374,20 +367,13 @@ impl AbstractDevice for Device {
             if siocsifdstaddr(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if self.route.is_some() {
-                let netmask = self.route.as_ref().unwrap().netmask;
-                let addr = self.route.as_ref().unwrap().addr;
-                if let Err(e) = self.set_route(Route {
-                    addr,
-                    netmask,
-                    dest: value,
-                }) {
-                    log::trace!("{e:?}");
-                }
+            if let Some(ref mut route) = &mut self.route {
+                route.dest = value;
             }
             Ok(())
         }
     }
+
     /// Question on macOS
     fn broadcast(&self) -> Result<IpAddr> {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
@@ -403,6 +389,7 @@ impl AbstractDevice for Device {
             ))
         }
     }
+
     /// Question on macOS
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
         let IpAddr::V4(value) = value else {
@@ -448,16 +435,8 @@ impl AbstractDevice for Device {
             if siocsifnetmask(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if self.route.is_some() {
-                let dest = self.route.as_ref().unwrap().dest;
-                let addr = self.route.as_ref().unwrap().addr;
-                if let Err(e) = self.set_route(Route {
-                    addr,
-                    netmask: value,
-                    dest,
-                }) {
-                    log::trace!("{e:?}");
-                }
+            if let Some(ref mut route) = &mut self.route {
+                route.netmask = value;
             }
             Ok(())
         }
