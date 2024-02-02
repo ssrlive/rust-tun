@@ -36,6 +36,7 @@ use std::{
     ptr,
 };
 
+#[derive(Clone, Copy)]
 struct Route {
     addr: Ipv4Addr,
     netmask: Ipv4Addr,
@@ -240,18 +241,27 @@ impl Device {
         if let Some(v) = &self.route {
             let prefix_len = v.netmask.to_prefix_len();
             let (start_ip, _) = v.addr.ip_range(v.netmask.to_prefix_len());
-            let c = format!(
-                "sudo route -n delete -net {}/{prefix_len} {}",
-                start_ip, v.dest
-            );
-            run_command(c)?;
+            // command: route -n delete -net 10.0.0.0/24 10.0.0.1
+            let args = [
+                "-n",
+                "delete",
+                "-net",
+                &format!("{}/{}", start_ip, prefix_len),
+                &v.dest.to_string(),
+            ];
+            run_command("route", &args)?;
         }
+
+        // command: route -n add -net 10.0.0.9/24 10.0.0.1
         let prefix = route.netmask.to_prefix_len();
-        let c = format!(
-            "sudo route -n add -net {}/{prefix} {}",
-            route.addr, route.dest
-        );
-        run_command(c)?;
+        let args = [
+            "-n",
+            "add",
+            "-net",
+            &format!("{}/{}", route.addr, prefix),
+            &route.dest.to_string(),
+        ];
+        run_command("route", &args)?;
         self.route = Some(route);
         Ok(())
     }
@@ -333,8 +343,9 @@ impl AbstractDevice for Device {
             if siocsifaddr(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if let Some(ref mut route) = &mut self.route {
+            if let Some(mut route) = self.route {
                 route.addr = value;
+                self.set_route(route)?;
             }
             Ok(())
         }
@@ -367,8 +378,9 @@ impl AbstractDevice for Device {
             if siocsifdstaddr(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if let Some(ref mut route) = &mut self.route {
+            if let Some(mut route) = self.route {
                 route.dest = value;
+                self.set_route(route)?;
             }
             Ok(())
         }
@@ -435,8 +447,9 @@ impl AbstractDevice for Device {
             if siocsifnetmask(ctl.as_raw_fd(), &req) < 0 {
                 return Err(io::Error::last_os_error().into());
             }
-            if let Some(ref mut route) = &mut self.route {
+            if let Some(mut route) = self.route {
                 route.netmask = value;
+                self.set_route(route)?;
             }
             Ok(())
         }
@@ -490,13 +503,18 @@ impl IntoRawFd for Device {
     }
 }
 
-fn run_command(c: String) -> Result<bool> {
-    let o = std::process::Command::new("sh")
-        .arg("-c")
-        .arg(c.clone())
-        .output()?;
-    let r = o.status.success();
-    let output = String::from_utf8_lossy(&o.stdout).trim().to_string();
-    log::trace!("{c} is {}\n{output}\n", if r { "ok" } else { "failure" });
-    Ok(r)
+/// Runs a command and returns an error if the command fails, just convenience for users.
+#[doc(hidden)]
+pub fn run_command(command: &str, args: &[&str]) -> std::io::Result<Vec<u8>> {
+    let out = std::process::Command::new(command).args(args).output()?;
+    if !out.status.success() {
+        let err = String::from_utf8_lossy(if out.stderr.is_empty() {
+            &out.stdout
+        } else {
+            &out.stderr
+        });
+        let info = format!("{} failed with: \"{}\"", command, err);
+        return Err(std::io::Error::new(std::io::ErrorKind::Other, info));
+    }
+    Ok(out.stdout)
 }
