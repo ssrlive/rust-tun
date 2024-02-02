@@ -514,6 +514,6 @@ fn run_command(c: String) -> Result<bool> {
         .output()?;
     let r = o.status.success();
     let output = String::from_utf8_lossy(&o.stdout).trim().to_string();
-    log::trace!("{c}\n{output}\n");
+    log::trace!("{c} is {}\n{output}\n", if r { "ok" } else { "failure" });
     Ok(r)
 }
