@@ -25,6 +25,7 @@ tokio = { version = "1", features = [
     "io-util",
 ], optional = true }
 tokio-util = { version = "0.7", features = ["codec"], optional = true }
+etherparse = { version = "^0.14.0", optional = true }
 
 [target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "android"))'.dependencies]
 ioctl = { version = "0.8", package = "ioctl-sys" }
@@ -45,6 +46,7 @@ tokio = { version = "1", features = ["rt-multi-thread"] }
 [features]
 default = []
 async = ["tokio", "futures-core", "tokio-util"]
+offload = ["etherparse"]
 
 [[example]]
 name = "read-async"

@@ -41,6 +41,21 @@ pub enum Error {
     #[error("out of range integral type conversion attempted")]
     TryFromIntError,
 
+    #[error("buffer too small")]
+    BufferTooSmall,
+
+    #[error("offload flow not found")]
+    OffloadFlowNotFound,
+
+    #[error("offload item invalid checksum")]
+    OffloadItemInvalidChecksum,
+
+    #[error("offload packet invalid checksum")]
+    OffloadPacketInvalidChecksum,
+
+    #[error("offload TCP PSH flag set")]
+    OffloadTcpPshFlagSet,
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 

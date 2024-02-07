@@ -17,6 +17,10 @@
 pub mod sys;
 
 mod device;
+
+#[cfg(feature = "offload")]
+mod offload;
+
 pub use self::device::Device;
 
 use crate::configuration::Configuration;
