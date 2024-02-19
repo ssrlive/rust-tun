@@ -57,7 +57,7 @@ impl IpCoaleasceable for Ipv4Header {
             return false;
         }
 
-        return true;
+       true
     }
 }
 
@@ -72,7 +72,7 @@ impl IpCoaleasceable for Ipv6Header {
             return false;
         }
 
-        return true;
+        true
     }
 }
 
