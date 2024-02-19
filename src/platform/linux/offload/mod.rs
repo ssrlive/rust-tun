@@ -39,7 +39,7 @@ impl<K: Hash + Eq, T> GroTable<K, T> {
     /// Get or insert a new item into the table.
     pub(crate) fn get_or_insert(&mut self, key: K, item: T) -> &mut Vec<T> {
         match self.items_by_flow.entry(key) {
-            Entry::Occupied(mut entry) => entry.into_mut(),
+            Entry::Occupied(entry) => entry.into_mut(),
             Entry::Vacant(entry) => {
                 let mut items = Vec::with_capacity(IDEAL_BATCH_SIZE);
                 items.push(item);
