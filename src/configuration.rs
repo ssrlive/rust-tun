@@ -15,11 +15,18 @@
 use std::net::IpAddr;
 #[cfg(unix)]
 use std::os::unix::io::RawFd;
-#[cfg(windows)]
-use std::os::windows::raw::HANDLE;
 
 use crate::address::IntoAddress;
 use crate::platform::PlatformConfig;
+
+cfg_if::cfg_if! {
+    if #[cfg(windows)] {
+        #[derive(Clone, Debug)]
+        pub(crate) struct WinHandle(std::os::windows::raw::HANDLE);
+        unsafe impl Send for WinHandle {}
+        unsafe impl Sync for WinHandle {}
+    }
+}
 
 /// TUN interface OSI layer of operation.
 #[derive(Clone, Copy, Default, Debug, Eq, PartialEq)]
@@ -32,7 +39,7 @@ pub enum Layer {
 /// Configuration builder for a TUN interface.
 #[derive(Clone, Default, Debug)]
 pub struct Configuration {
-    pub(crate) name: Option<String>,
+    pub(crate) tun_name: Option<String>,
     pub(crate) platform_config: PlatformConfig,
     pub(crate) address: Option<IpAddr>,
     pub(crate) destination: Option<IpAddr>,
@@ -47,7 +54,7 @@ pub struct Configuration {
     #[cfg(not(unix))]
     pub(crate) raw_fd: Option<i32>,
     #[cfg(windows)]
-    pub(crate) raw_handle: Option<HANDLE>,
+    pub(crate) raw_handle: Option<WinHandle>,
 }
 
 impl Configuration {
@@ -60,11 +67,21 @@ impl Configuration {
         self
     }
 
-    /// Set the name.
+    /// Functionally equivalent to `tun_name`
+    #[deprecated(
+        since = "1.1.2",
+        note = "Since the API `name` may have an easy name conflict when IDE prompts, it is replaced by `tun_name` for better coding experience"
+    )]
+    pub fn name<S: AsRef<str>>(&mut self, tun_name: S) -> &mut Self {
+        self.tun_name = Some(tun_name.as_ref().into());
+        self
+    }
+
+    /// Set the tun name.
     ///
-    /// [Note: on macOS, the name must be the form `utunx` where `x` is a number, such as `utun3`. -- end note]
-    pub fn name<S: AsRef<str>>(&mut self, name: S) -> &mut Self {
-        self.name = Some(name.as_ref().into());
+    /// [Note: on macOS, the tun name must be the form `utunx` where `x` is a number, such as `utun3`. -- end note]
+    pub fn tun_name<S: AsRef<str>>(&mut self, tun_name: S) -> &mut Self {
+        self.tun_name = Some(tun_name.as_ref().into());
         self
     }
 
@@ -141,8 +158,8 @@ impl Configuration {
         self
     }
     #[cfg(windows)]
-    pub fn raw_handle(&mut self, handle: HANDLE) -> &mut Self {
-        self.raw_handle = Some(handle);
+    pub fn raw_handle(&mut self, handle: std::os::windows::raw::HANDLE) -> &mut Self {
+        self.raw_handle = Some(WinHandle(handle));
         self
     }
 }
