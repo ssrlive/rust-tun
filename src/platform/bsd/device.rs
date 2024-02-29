@@ -88,7 +88,7 @@ impl Device {
             }
 
 			// low bits
-            req.ifr_ifru.ifru_flags[0] = device_type;
+            req.ifr_ifru.ifru_flags[0] = 1;
 
 			//high bits
 			req.ifr_ifru.ifru_flags[0] = 1;
