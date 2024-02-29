@@ -91,7 +91,7 @@ impl Device {
             req.ifr_ifru.ifru_flags[0] = 1;
 
 			//high bits
-			req.ifr_ifru.ifru_flags[0] = 1;
+			req.ifr_ifru.ifru_flags[1] = 1;
 
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
