@@ -87,11 +87,11 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            // low bits
-            //req.ifr_ifru.ifru_flags[0] = 1;
+            // low 16 bits
+            req.ifr_ifru.ifru_flags[0] = IFF_UP | IFF_RUNNING;
 
-            //high bits
-            //req.ifr_ifru.ifru_flags[1] = 1;
+            // high 16 bits
+            req.ifr_ifru.ifru_flags[1] = 1;
 
 			let dev_name = dev.unwrap().into_string().unwrap();
 
