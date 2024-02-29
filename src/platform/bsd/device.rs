@@ -71,7 +71,7 @@ impl Device {
                     Some(tun_name)
                 }
 
-                None =>  CString::new(format!("tun0"))?,
+                None =>  Some(CString::new(format!("tun0"))?),
             };
 
             let mut req: ifreq = mem::zeroed();
