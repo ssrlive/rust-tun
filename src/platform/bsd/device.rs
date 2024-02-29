@@ -67,7 +67,7 @@ impl Device {
                     Some(tun_name)
                 }
 
-                None => None,
+                None => Some(CString::new("tun0")?),
             };
 
             let mut req: ifreq = mem::zeroed();
@@ -88,13 +88,16 @@ impl Device {
             }
 
             // low bits
-            req.ifr_ifru.ifru_flags[0] = 1;
+            //req.ifr_ifru.ifru_flags[0] = 1;
 
             //high bits
-            req.ifr_ifru.ifru_flags[1] = 1;
+            //req.ifr_ifru.ifru_flags[1] = 1;
+
+			let dev_name = dev.unwrap().into_string().unwrap();
 
             let tun = {
-                let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
+				let device = format!("/dev/{dev_name}\0");
+                let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
                 if let Err(err) = siocsifflags(tun.0, &mut req as *mut _ as *mut _) {
                     dbg!("error in 96");
