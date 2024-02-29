@@ -87,7 +87,7 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            req.ifr_ifru.ifru_flags = [device_type,0];
+            req.ifr_ifru.ifru_flags = [device_type, 0];
 
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
@@ -110,11 +110,11 @@ impl Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
                 ctl,
-                packet_information:false,
+                packet_information: false,
             }
         };
 
-		device.configure(config)?;
+        device.configure(config)?;
 
         Ok(device)
     }
@@ -205,7 +205,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_tun_name(&mut self, _value: &str) -> Result<()> {
-		Err(Error::InvalidName)
+        Err(Error::InvalidName)
     }
 
     fn enabled(&mut self, value: bool) -> Result<()> {
