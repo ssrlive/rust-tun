@@ -87,20 +87,20 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-			// low bits
+            // low bits
             req.ifr_ifru.ifru_flags[0] = 1;
 
-			//high bits
-			req.ifr_ifru.ifru_flags[1] = 1;
+            //high bits
+            req.ifr_ifru.ifru_flags[1] = 1;
 
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
                 if let Err(err) = siocsifflags(tun.0, &mut req as *mut _ as *mut _) {
-					dbg!("error in 96");
+                    dbg!("error in 96");
                     return Err(io::Error::from(err).into());
                 }
-				println!("{req:?}");
+                println!("{req:?}");
                 tun
             };
 
@@ -115,11 +115,11 @@ impl Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
                 ctl,
-                packet_information:false,
+                packet_information: false,
             }
         };
 
-		device.configure(config)?;
+        device.configure(config)?;
 
         Ok(device)
     }
@@ -177,11 +177,11 @@ impl AbstractDevice for Device {
     }
 
     fn set_tun_name(&mut self, _value: &str) -> Result<()> {
-		Err(Error::InvalidName)
+        Err(Error::InvalidName)
     }
 
     fn enabled(&mut self, value: bool) -> Result<()> {
-		println!("invoke enabled");
+        println!("invoke enabled");
         unsafe {
             let mut req = self.request();
 
@@ -218,7 +218,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-		println!("set_address");
+        println!("set_address");
         let IpAddr::V4(value) = value else {
             unimplemented!("do not support IPv6 yet")
         };
@@ -249,7 +249,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-		println!("set_destination");
+        println!("set_destination");
         let IpAddr::V4(value) = value else {
             unimplemented!("do not support IPv6 yet")
         };
@@ -280,7 +280,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
-		println!("set_broadcast");
+        println!("set_broadcast");
         let IpAddr::V4(value) = value else {
             unimplemented!("do not support IPv6 yet")
         };
@@ -311,7 +311,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-		println!("set_netmask");
+        println!("set_netmask");
         let IpAddr::V4(value) = value else {
             unimplemented!("do not support IPv6 yet")
         };
@@ -343,7 +343,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_mtu(&mut self, value: u16) -> Result<()> {
-		println!("set_mtu");
+        println!("set_mtu");
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_mtu = value as i32;

@@ -14,7 +14,7 @@
 
 //! Bindings to internal FreeBSD stuff.
 
-use libc::{c_char, c_uint,c_int, ifreq, sockaddr, IFNAMSIZ};
+use libc::{c_char, c_int, c_uint, ifreq, sockaddr, IFNAMSIZ};
 use nix::{ioctl_readwrite, ioctl_write_ptr};
 
 #[allow(non_camel_case_types)]
@@ -34,7 +34,6 @@ pub struct ifaliasreq {
     pub broadaddr: sockaddr,
     pub mask: sockaddr,
 }
-
 
 ioctl_write_ptr!(siocsifflags, b'i', 16, ifreq);
 ioctl_readwrite!(siocgifflags, b'i', 17, ifreq);
