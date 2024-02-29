@@ -131,39 +131,6 @@ impl Device {
         req
     }
 
-    /// Make the device persistent.
-    pub fn persist(&mut self) -> Result<()> {
-        unsafe {
-            if let Err(err) = tunsetpersist(self.as_raw_fd(), &1) {
-                Err(io::Error::from(err).into())
-            } else {
-                Ok(())
-            }
-        }
-    }
-
-    /// Set the owner of the device.
-    pub fn user(&mut self, value: i32) -> Result<()> {
-        unsafe {
-            if let Err(err) = tunsetowner(self.as_raw_fd(), &value) {
-                Err(io::Error::from(err).into())
-            } else {
-                Ok(())
-            }
-        }
-    }
-
-    /// Set the group of the device.
-    pub fn group(&mut self, value: i32) -> Result<()> {
-        unsafe {
-            if let Err(err) = tunsetgroup(self.as_raw_fd(), &value) {
-                Err(io::Error::from(err).into())
-            } else {
-                Ok(())
-            }
-        }
-    }
-
     /// Split the interface into a `Reader` and `Writer`.
     pub fn split(self) -> (posix::Reader, posix::Writer) {
         (self.tun.reader, self.tun.writer)
