@@ -230,6 +230,7 @@ impl AbstractDevice for Device {
             req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
 
             if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), &req) {
+				println!("set addr error");
                 return Err(io::Error::from(err).into());
             }
 
