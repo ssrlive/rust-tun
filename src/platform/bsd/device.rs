@@ -89,10 +89,10 @@ impl Device {
             }
 
             // low 16 bits
-            req.ifr_ifru.ifru_flags[0] = (IFF_UP | IFF_RUNNING) as _;
+            //req.ifr_ifru.ifru_flags[0] = (IFF_UP | IFF_RUNNING) as _;
 
             // high 16 bits
-            req.ifr_ifru.ifru_flags[1] = 1;
+            //req.ifr_ifru.ifru_flags[1] = 1;
 
 			let dev_name = dev.unwrap().into_string().unwrap();
 
@@ -101,7 +101,7 @@ impl Device {
                 let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 				println!("{:?}",req.ifr_name);
-                if let Err(err) = siocifcreate(tun.0, &mut req as *mut _ as *mut _) {
+                if let Err(err) = siocgifflags(tun.0, &mut req as *mut _ as *mut _) {
                     dbg!("error in 96",err);
                     return Err(io::Error::from(err).into());
                 }
