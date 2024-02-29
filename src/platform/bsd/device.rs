@@ -77,7 +77,7 @@ impl Device {
                 ptr::copy_nonoverlapping(
                     dev.as_ptr() as *const c_char,
                     req.ifr_name.as_mut_ptr(),
-                    dev.as_bytes().len(),
+                    dev.as_bytes().len() + 1,
                 );
             }
 
