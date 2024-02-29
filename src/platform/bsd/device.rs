@@ -80,7 +80,7 @@ impl Device {
                 );
             }
 
-            let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
+            //let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
 
             let queues_num = config.queues.unwrap_or(1);
             if queues_num != 1 {
@@ -88,7 +88,7 @@ impl Device {
             }
 
 			// low bits
-            req.ifr_ifru.ifru_flags[0] = device_type;
+            req.ifr_ifru.ifru_flags[0] = 0;
 
 			//high bits
 			req.ifr_ifru.ifru_flags[0] = 1;
