@@ -105,7 +105,7 @@ impl Device {
 				// if let Err(err) = siocgifflags(ctl.0, &mut req as *mut _ as *mut _) {
 				// 	return Err(io::Error::from(err).into());
 				// }
-				// println!("{:?}",req);
+				// println!("{:?}",req);   
                 tun
             };
 
