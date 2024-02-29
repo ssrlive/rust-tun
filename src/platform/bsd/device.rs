@@ -92,9 +92,9 @@ impl Device {
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-                if let Err(err) = tunsetiff(tun.0, &mut req as *mut _ as *mut _) {
-                    return Err(io::Error::from(err).into());
-                }
+                // if let Err(err) = tunsetiff(tun.0, &mut req as *mut _ as *mut _) {
+                //     return Err(io::Error::from(err).into());
+                // }
 
                 tun
             };
