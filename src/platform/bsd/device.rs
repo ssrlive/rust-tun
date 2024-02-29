@@ -58,11 +58,7 @@ impl Device {
         let mut device = unsafe {
             let dev = match config.tun_name.as_ref() {
                 Some(tun_name) => {
-					if !tun_name.starts_with("tun") {
-						return Err(Error::InvalidName);
-					}
-					let index = tun_name[4..].parse::<u32>()? + 1_u32;
-                    let tun_name = CString::new(format!("tun{index}"))?;
+                    let tun_name = CString::new(tun_name.clone())?;
 
                     if tun_name.as_bytes_with_nul().len() > IFNAMSIZ {
                         return Err(Error::NameTooLong);
@@ -71,7 +67,7 @@ impl Device {
                     Some(tun_name)
                 }
 
-                None =>  Some(CString::new(format!("tun0"))?),
+                None => None,
             };
 
             let mut req: ifreq = mem::zeroed();
@@ -84,8 +80,6 @@ impl Device {
                 );
             }
 
-			let dev = dev.unwrap();
-
             //let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
 
             let queues_num = config.queues.unwrap_or(1);
@@ -94,14 +88,13 @@ impl Device {
             }
 
 			// low bits
-            req.ifr_ifru.ifru_flags[0] = 0;
+            req.ifr_ifru.ifru_flags[0] = device_type;
 
 			//high bits
 			req.ifr_ifru.ifru_flags[0] = 1;
 
             let tun = {
-				let device = format!("/dev/tun0\0");
-                let fd = libc::open(device.as_bytes().as_ptr() as *const _, O_RDWR);
+                let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
                 if let Err(err) = siocsifflags(tun.0, &mut req as *mut _ as *mut _) {
 					dbg!("error in 96");
