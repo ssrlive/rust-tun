@@ -91,7 +91,7 @@ impl Device {
             req.ifr_ifru.ifru_flags = [device_type,0];
 
             let tun = {
-                let fd = libc::open(b"/dev/net/tun\0".as_ptr() as *const _, O_RDWR);
+                let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
 				dbg!("invoke here");
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 				dbg!("invoke here 97");
