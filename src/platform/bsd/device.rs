@@ -333,7 +333,7 @@ impl AbstractDevice for Device {
             }
 
             Ok(IpAddr::V4(
-                SockAddr::new(&req.ifr_ifru.ifru_netmask).map(Into::into)?,
+                SockAddr::new(&req.ifr_ifru.ifru_addr).map(Into::into)?,
             ))
         }
     }
@@ -344,7 +344,7 @@ impl AbstractDevice for Device {
         };
         unsafe {
             let mut req = self.request();
-            req.ifr_ifru.ifru_netmask = SockAddr::from(value).into();
+            req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
 
             if let Err(err) = siocsifnetmask(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
