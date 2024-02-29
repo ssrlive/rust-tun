@@ -22,6 +22,11 @@ pub mod linux;
 #[cfg(target_os = "linux")]
 pub use self::linux::{create, Device, PlatformConfig};
 
+#[cfg(target_os = "freebsd")]
+pub mod bsd;
+#[cfg(target_os = "freebsd")]
+pub use self::bsd::{create, Device, PlatformConfig};
+
 #[cfg(target_os = "macos")]
 pub mod macos;
 #[cfg(target_os = "macos")]
