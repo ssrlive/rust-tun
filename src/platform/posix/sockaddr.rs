@@ -50,6 +50,7 @@ impl From<Ipv4Addr> for SockAddr {
 
         addr.sin_family = libc::AF_INET as libc::sa_family_t;
         addr.sin_port = 0;
+		addr.sin_len = std::mem::size_of::<sockaddr_in>() as u8;
         addr.sin_addr = in_addr {
             s_addr: u32::from_ne_bytes(octets),
         };
