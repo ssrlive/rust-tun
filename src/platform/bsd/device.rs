@@ -87,14 +87,12 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            let packet_information = config.platform_config.packet_information;
             req.ifr_ifru.ifru_flags = [device_type,0];
 
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
                 if let Err(err) = tunsetiff(tun.0, &mut req as *mut _ as *mut _) {
-					dbg!("error in here");
                     return Err(io::Error::from(err).into());
                 }
 
@@ -110,15 +108,13 @@ impl Device {
                 .to_string();
             Device {
                 tun_name,
-                tun: Tun::new(tun, mtu, packet_information),
+                tun: Tun::new(tun, mtu, false),
                 ctl,
-                packet_information,
+                packet_information:false,
             }
         };
 
-        if config.platform_config.ensure_root_privileges {
-            device.configure(config)?;
-        }
+		device.configure(config)?;
 
         Ok(device)
     }
