@@ -100,10 +100,8 @@ impl Device {
 				let device = format!("/dev/{dev_name}\0");
                 let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
 				println!("open fd");
-                let tun = Fd::new(-1).map_err(|_| io::Error::last_os_error())?;
-				println!("{:?}",tun.0);
-				println!("{:?}",req);
-                if let Err(err) = siocgifflags(tun.0, &mut req as *mut _ as *mut _) {
+                let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+                if let Err(err) = siocgifflags(-1, &mut req as *mut _ as *mut _) {
                     dbg!("error in 96",err);
                     return Err(io::Error::from(err).into());
                 }
