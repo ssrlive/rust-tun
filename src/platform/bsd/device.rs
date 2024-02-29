@@ -106,6 +106,7 @@ impl Device {
                     dbg!("error in 96",err);
                     return Err(io::Error::from(err).into());
                 }
+				println!("{:?}\n{:?}",tun.0,req);
                 tun
             };
 
