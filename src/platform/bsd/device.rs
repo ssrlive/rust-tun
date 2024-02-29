@@ -88,7 +88,7 @@ impl Device {
             }
 
             // low 16 bits
-            req.ifr_ifru.ifru_flags[0] = IFF_UP | IFF_RUNNING;
+            req.ifr_ifru.ifru_flags[0] = (IFF_UP | IFF_RUNNING) as _;
 
             // high 16 bits
             req.ifr_ifru.ifru_flags[1] = 1;
