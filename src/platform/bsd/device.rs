@@ -73,6 +73,7 @@ impl Device {
             let mut req: ifreq = mem::zeroed();
 
             if let Some(dev) = dev.as_ref() {
+				println!("len ={}", dev.as_bytes().len());
                 ptr::copy_nonoverlapping(
                     dev.as_ptr() as *const c_char,
                     req.ifr_name.as_mut_ptr(),
