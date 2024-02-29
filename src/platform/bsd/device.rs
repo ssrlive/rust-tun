@@ -96,22 +96,20 @@ impl Device {
 
 			let dev_name = dev.unwrap().into_string().unwrap();
 
+			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
+
             let tun = {
 				let device = format!("/dev/{dev_name}\0");
                 let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
-				println!("open fd");
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-                if let Err(err) = siocgifflags(-1, &mut req as *mut _ as *mut _) {
-                    dbg!("error in 96",err);
-                    return Err(io::Error::from(err).into());
-                }
-				println!("{:?}\n{:?}",tun.0,req);
+				if let Err(err) = siocgifflags(ctl.0, &mut req as *mut _ as *mut _) {
+					dbg!("error in 96",err);
+					return Err(io::Error::from(err).into());
+				}
                 tun
             };
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
-
-            let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
             let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
                 .to_string_lossy()
