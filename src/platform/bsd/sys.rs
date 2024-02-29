@@ -35,8 +35,6 @@ pub struct ifaliasreq {
     pub mask: sockaddr,
 }
 
-ioctl_write_ptr!(tunsetiff, b'i', 17, c_int);
-
 
 ioctl_write_ptr!(siocsifflags, b'i', 16, ifreq);
 ioctl_readwrite!(siocgifflags, b'i', 17, ifreq);
