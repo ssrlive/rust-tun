@@ -228,7 +228,7 @@ impl AbstractDevice for Device {
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
-			println!("{req:?}");
+			println!("{req:?}");  
             if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), &req) {
 				println!("set addr error");
                 return Err(io::Error::from(err).into());
