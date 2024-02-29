@@ -87,7 +87,6 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            let packet_information = config.platform_config.packet_information;
             req.ifr_ifru.ifru_flags = [device_type,0];
 
             let tun = {
@@ -109,15 +108,13 @@ impl Device {
                 .to_string();
             Device {
                 tun_name,
-                tun: Tun::new(tun, mtu, packet_information),
+                tun: Tun::new(tun, mtu, false),
                 ctl,
-                packet_information,
+                packet_information:false,
             }
         };
 
-        if config.platform_config.ensure_root_privileges {
-            device.configure(config)?;
-        }
+		device.configure(config)?;
 
         Ok(device)
     }
