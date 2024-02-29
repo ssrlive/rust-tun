@@ -84,6 +84,8 @@ impl Device {
                 );
             }
 
+			let dev = dev.unwrap();
+
             //let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
 
             let queues_num = config.queues.unwrap_or(1);
