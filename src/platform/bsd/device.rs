@@ -100,7 +100,7 @@ impl Device {
 			req.ifr_ifru.ifru_flags[0] = 1;
 
             let tun = {
-				let device = format!("/dev/{dev}\0");
+				let device = format!("/dev/tun0\0");
                 let fd = libc::open(device.as_bytes().as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
                 if let Err(err) = siocsifflags(tun.0, &mut req as *mut _ as *mut _) {
