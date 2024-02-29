@@ -88,7 +88,7 @@ impl Device {
             }
 
             let packet_information = config.platform_config.packet_information;
-            req.ifr_ifru.ifru_flags = device_type;
+            req.ifr_ifru.ifru_flags = [device_type,0];
 
             let tun = {
                 let fd = libc::open(b"/dev/net/tun\0".as_ptr() as *const _, O_RDWR);
@@ -209,28 +209,7 @@ impl AbstractDevice for Device {
     }
 
     fn set_tun_name(&mut self, value: &str) -> Result<()> {
-        unsafe {
-            let tun_name = CString::new(value)?;
-
-            if tun_name.as_bytes_with_nul().len() > IFNAMSIZ {
-                return Err(Error::NameTooLong);
-            }
-
-            let mut req = self.request();
-            ptr::copy_nonoverlapping(
-                tun_name.as_ptr() as *const c_char,
-                req.ifr_ifru.ifru_newname.as_mut_ptr(),
-                value.len(),
-            );
-
-            if let Err(err) = siocsifname(self.ctl.as_raw_fd(), &req) {
-                return Err(io::Error::from(err).into());
-            }
-
-            self.tun_name = value.into();
-
-            Ok(())
-        }
+		Err(Error::InvalidName)
     }
 
     fn enabled(&mut self, value: bool) -> Result<()> {
