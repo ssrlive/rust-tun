@@ -22,6 +22,7 @@ pub use self::device::Device;
 use crate::configuration::Configuration;
 use crate::error::Result;
 
+#[derive(Copy, Clone, Default, Debug)]
 pub struct PlatformConfig;
 
 
