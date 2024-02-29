@@ -87,7 +87,7 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            req.ifr_ifru.ifru_flags = [device_type,0];
+            //req.ifr_ifru.ifru_flags = [device_type,0];
 
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
