@@ -87,12 +87,16 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            //req.ifr_ifru.ifru_flags = [device_type,0];
+			// low bits
+            req.ifr_ifru.ifru_flags[0] = device_type;
+
+			//high bits
+			req.ifr_ifru.ifru_flags[0] = 0;
 
             let tun = {
                 let fd = libc::open(b"/dev/tun\0".as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-                if let Err(err) = siocgifflags(tun.0, &mut req as *mut _ as *mut _) {
+                if let Err(err) = siocsifflags(tun.0, &mut req as *mut _ as *mut _) {
 					dbg!("error in 96");
                     return Err(io::Error::from(err).into());
                 }
