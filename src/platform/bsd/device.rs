@@ -29,7 +29,7 @@ use crate::{
     configuration::{Configuration, Layer},
     device::AbstractDevice,
     error::{Error, Result},
-    platform::linux::sys::*,
+    platform::bsd::sys::*,
     platform::posix::{self, Fd, SockAddr, Tun},
 };
 
