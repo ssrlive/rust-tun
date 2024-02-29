@@ -208,7 +208,7 @@ impl AbstractDevice for Device {
         Ok(self.tun_name.clone())
     }
 
-    fn set_tun_name(&mut self, value: &str) -> Result<()> {
+    fn set_tun_name(&mut self, _value: &str) -> Result<()> {
 		Err(Error::InvalidName)
     }
 
