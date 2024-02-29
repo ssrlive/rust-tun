@@ -77,7 +77,7 @@ impl Device {
                 ptr::copy_nonoverlapping(
                     dev.as_ptr() as *const c_char,
                     req.ifr_name.as_mut_ptr(),
-                    dev.as_bytes().len() + 1,
+                    dev.as_bytes().len(),
                 );
             }
 
@@ -99,6 +99,7 @@ impl Device {
             let tun = {
 				let device = format!("/dev/{dev_name}\0");
                 let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
+				println!("open fd");
                 let tun = Fd::new(-1).map_err(|_| io::Error::last_os_error())?;
 				println!("{:?}",tun.0);
 				println!("{:?}",req);
