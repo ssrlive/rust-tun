@@ -221,9 +221,9 @@ impl AbstractDevice for Device {
             }
 
             if value {
-                req.ifr_ifru.ifru_flags |= (IFF_UP | IFF_RUNNING) as c_short;
+                req.ifr_ifru.ifru_flags[0] |= (IFF_UP | IFF_RUNNING) as c_short;
             } else {
-                req.ifr_ifru.ifru_flags &= !(IFF_UP as c_short);
+                req.ifr_ifru.ifru_flags[0] &= !(IFF_UP as c_short);
             }
 
             if let Err(err) = siocsifflags(self.ctl.as_raw_fd(), &req) {
