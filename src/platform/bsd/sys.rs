@@ -55,3 +55,5 @@ ioctl_readwrite!(siocgifmtu, b'i', 51, ifreq);
 
 ioctl_write_ptr!(siocaifaddr, b'i', 43, ifaliasreq);
 ioctl_write_ptr!(siocdifaddr, b'i', 25, ifreq);
+
+ioctl_write_ptr!(siocifcreate, b'i', 122, ifreq);
