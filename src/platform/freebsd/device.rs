@@ -77,29 +77,11 @@ impl Device {
                 None => Some(String::from("tun0")),
             };
 
-            // let mut req: ifreq = mem::zeroed();
-
-            // if let Some(dev) = dev.as_ref() {
-			// 	//println!("len ={}", dev.as_bytes().len());
-            //     ptr::copy_nonoverlapping(
-            //         dev.as_ptr() as *const c_char,
-            //         req.ifr_name.as_mut_ptr(),
-            //         dev.as_bytes().len(),
-            //     );
-            // }
-
-            //let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
-
             let queues_num = config.queues.unwrap_or(1);
             if queues_num != 1 {
                 return Err(Error::InvalidQueuesNumber);
             }
 
-            // low 16 bits
-            //req.ifr_ifru.ifru_flags[0] = (IFF_UP | IFF_RUNNING) as _;
-
-            // high 16 bits
-            //req.ifr_ifru.ifru_flags[1] = 1;
 
 			let dev_name = dev.unwrap();
 
