@@ -122,54 +122,54 @@ impl Device {
             }
         };
 
-        // device.set_alias(
-        //     config
-        //         .address
-        //         .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
-        //     config
-        //         .destination
-        //         .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
-        //     config
-        //         .netmask
-        //         .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
-        // )?;
+        device.set_alias(
+            config
+                .address
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
+            config
+                .destination
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
+            config
+                .netmask
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
+        )?;
 
-        device.configure(config)?;
+        //device.configure(config)?;
 
         Ok(device)
     }
 
 	    /// Set the IPv4 alias of the device.
-		// pub fn set_alias(&mut self, addr: IpAddr, broadaddr: IpAddr, mask: IpAddr) -> Result<()> {
-		// 	let IpAddr::V4(addr) = addr else {
-		// 		unimplemented!("do not support IPv6 yet")
-		// 	};
-		// 	let IpAddr::V4(broadaddr) = broadaddr else {
-		// 		unimplemented!("do not support IPv6 yet")
-		// 	};
-		// 	let IpAddr::V4(mask) = mask else {
-		// 		unimplemented!("do not support IPv6 yet")
-		// 	};
-		// 	let tun_name:&String = &self.tun_name;
-		// 	let ctl = &self.ctl;
-		// 	unsafe {
-		// 		let mut req: ifaliasreq = mem::zeroed();
-		// 		ptr::copy_nonoverlapping(
-		// 			tun_name.as_ptr() as *const c_char,
-		// 			req.ifran.as_mut_ptr(),
-		// 			tun_name.len(),
-		// 		);
+		pub fn set_alias(&mut self, addr: IpAddr, broadaddr: IpAddr, mask: IpAddr) -> Result<()> {
+			let IpAddr::V4(addr) = addr else {
+				unimplemented!("do not support IPv6 yet")
+			};
+			let IpAddr::V4(broadaddr) = broadaddr else {
+				unimplemented!("do not support IPv6 yet")
+			};
+			let IpAddr::V4(mask) = mask else {
+				unimplemented!("do not support IPv6 yet")
+			};
+			let tun_name:&String = &self.tun_name;
+			let ctl = &self.ctl;
+			unsafe {
+				let mut req: in_aliasreq = mem::zeroed();
+				ptr::copy_nonoverlapping(
+					tun_name.as_ptr() as *const c_char,
+					req.ifra_name.as_mut_ptr(),
+					tun_name.len(),
+				);
 	
-		// 		req.addr = SockAddr::from(addr).into();
-		// 		req.broadaddr = SockAddr::from(broadaddr).into();
-		// 		req.mask = SockAddr::from(mask).into();
+				req.ifra_addr = SockAddr::from(addr).into();
+				req.ifra_dstaddr = SockAddr::from(broadaddr).into();
+				req.ifra_mask = SockAddr::from(mask).into();
 	
-		// 		if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
-		// 			return Err(io::Error::from(err).into());
-		// 		}
-		// 		Ok(())
-		// 	}
-		// }
+				if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
+					return Err(io::Error::from(err).into());
+				}
+				Ok(())
+			}
+		}
 
     /// Prepare a new request.
     unsafe fn request(&self) -> ifreq {
