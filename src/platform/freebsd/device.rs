@@ -105,14 +105,15 @@ impl Device {
             let (tun,device_name) = {
 				if let Some(name) = dev.as_ref(){
 					let device_name = format!("/dev/{}\0",name);
-					let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
+					let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
 					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 					(tun,device_name)
 				}else{
 					let (tun, device_name) = 'End:{
 						for i in 0..256{
 							let device_name = format!("/dev/tun{i}\0");
-							if libc::open(device_name.as_ptr() as *const _, O_RDWR) as _ > 0{
+							let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
+							if fd as _ > 0{
 								let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 								break 'End (tun, device_name);
 							}
