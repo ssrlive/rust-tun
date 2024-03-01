@@ -307,7 +307,6 @@ impl AbstractDevice for Device {
         unsafe {
             let mut req = self.request();
             if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &mut req) {
-                println!("delete previous addr");
                 return Err(io::Error::from(err).into());
             }
             let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
