@@ -263,8 +263,25 @@ impl AbstractDevice for Device {
         Ok(self.tun_name.clone())
     }
 
-    fn set_tun_name(&mut self, _value: &str) -> Result<()> {
-        Err(Error::InvalidName)
+    fn set_tun_name(&mut self, value: &str) -> Result<()> {
+		unsafe{
+			if value.len() > IFNAMSIZ {
+                return Err(Error::NameTooLong);
+            }
+			let mut req = self.request();
+			ptr::copy_nonoverlapping(
+                value.as_ptr() as *const c_char,
+                req.ifr_ifru.ifru_newname.as_mut_ptr(),
+                value.len(),
+            );
+			if let Err(err) = siocsifname(self.ctl.as_raw_fd(), &req) {
+                return Err(io::Error::from(err).into());
+            }
+
+            self.tun_name = value;
+
+			Ok(())
+		}
     }
 
     fn enabled(&mut self, value: bool) -> Result<()> {
