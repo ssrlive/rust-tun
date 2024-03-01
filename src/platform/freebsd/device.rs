@@ -315,20 +315,6 @@ impl AbstractDevice for Device {
     }
 
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
-        // println!("set_broadcast");
-        // let IpAddr::V4(value) = value else {
-        //     unimplemented!("do not support IPv6 yet")
-        // };
-        // unsafe {
-        //     let mut req = self.request();
-        //     req.ifr_ifru.ifru_broadaddr = SockAddr::from(value).into();
-
-        //     if let Err(err) = siocsifbrdaddr(self.ctl.as_raw_fd(), &req) {
-        //         return Err(io::Error::from(err).into());
-        //     }
-
-        //     Ok(())
-        // }
 		Ok(())
     }
 
@@ -347,20 +333,13 @@ impl AbstractDevice for Device {
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-        // println!("set_netmask");
-        // let IpAddr::V4(value) = value else {
-        //     unimplemented!("do not support IPv6 yet")
-        // };
-        // unsafe {
-        //     let mut req = self.request();
-        //     req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
-
-        //     if let Err(err) = siocsifnetmask(self.ctl.as_raw_fd(), &req) {
-        //         return Err(io::Error::from(err).into());
-        //     }
-
-        //     Ok(())
-        // }
+		unsafe{
+			let mut req = self.request();
+			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+				return Err(io::Error::from(err).into());
+			}
+			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 8)),IpAddr::V4(Ipv4Addr::new(255, 255, 0, 0)))?;
+		}
 		Ok(())
     }
 
