@@ -31,7 +31,7 @@ pub struct ctl_info {
 pub struct ifaliasreq {
     pub ifran: [c_char; IFNAMSIZ],
     pub addr: sockaddr,
-    pub broadaddr: sockaddr,
+    pub dstaddr: sockaddr,
     pub mask: sockaddr,
 	pub ifra_vhid:c_int
 }

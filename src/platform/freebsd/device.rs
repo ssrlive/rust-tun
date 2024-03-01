@@ -125,6 +125,7 @@ impl Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
                 ctl,
+				route: None,
             }
         };
 
@@ -167,7 +168,7 @@ impl Device {
 				);
 	
 				req.addr = SockAddr::from(addr).into();
-				req.broadaddr = SockAddr::from(dest).into();
+				req.dstaddr = SockAddr::from(dest).into();
 				req.mask = SockAddr::from(mask).into();
 	
 				if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
@@ -177,7 +178,7 @@ impl Device {
 				let route = Route {
 					addr,
 					netmask: mask,
-					dest: broadaddr,
+					dest: dest,
 				};
 				if let Err(e) = self.set_route(route) {
 					log::warn!("{e:?}");
