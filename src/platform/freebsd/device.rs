@@ -105,9 +105,7 @@ impl Device {
 			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
             let tun = {
-				if let Some(name) = dev.as_ref(){
-					let device_name = format!("/dev/{dev_name}\0");
-				} 
+				let device = format!("/dev/{dev_name}\0");
                 let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
                 let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 				// if let Err(err) = siocgifflags(ctl.0, &mut req as *mut _ as *mut _) {
