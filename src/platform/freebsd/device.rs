@@ -100,16 +100,14 @@ impl Device {
 								let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
 								if fd > 0{
 									let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-									return Some((tun, device_name));
+									return Ok((tun, device_name));
 								}
 							}
-							return None;
+							return Err(Error::InvalidName);
 						};
 						find_fd()
 					};
-					let Some((tun, device_name)) = result else {
-						return Err(Error::InvalidName);
-					};
+					let (tun, device_name) = result?;
 					(tun, device_name)
 				} 
             };
