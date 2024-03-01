@@ -65,16 +65,16 @@ impl Device {
         let mut device = unsafe {
             let dev = match config.tun_name.as_ref() {
                 Some(tun_name) => {
-                    let tun_name = CString::new(tun_name.clone())?;
+                    let tun_name = tun_name.clone();
 
-                    if tun_name.as_bytes_with_nul().len() > IFNAMSIZ {
+                    if tun_name.len() > IFNAMSIZ {
                         return Err(Error::NameTooLong);
                     }
 
                     Some(tun_name)
                 }
 
-                None => Some(CString::new("tun0")?),
+                None => Some(String::from("tun0")),
             };
 
             // let mut req: ifreq = mem::zeroed();
