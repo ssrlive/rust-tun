@@ -226,7 +226,7 @@ impl Device {
                 &v.dest.to_string(),
             ];
 			println!("{args:?}");
-            run_command("route", &args)?;
+            run_command("route", &args);
             log::info!("route {}", args.join(" "));
         }
 
