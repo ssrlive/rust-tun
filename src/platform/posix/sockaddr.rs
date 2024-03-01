@@ -60,8 +60,6 @@ impl From<Ipv4Addr> for SockAddr {
         fn set_sin_len(_addr: &mut sockaddr_in) {}
         set_sin_len(&mut addr);
 
-        addr.sin_len = std::mem::size_of::<sockaddr_in>() as u8;
-
         addr.sin_addr = in_addr {
             s_addr: u32::from_ne_bytes(octets),
         };
