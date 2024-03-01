@@ -92,7 +92,7 @@ impl Device {
 					let device_path = format!("/dev/{}\0",name);
 					let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
 					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-					(tun,name)
+					(tun,name.clone())
 				}else{
 					let (tun, device_name) = 'End:{
 						for i in 0..256{
