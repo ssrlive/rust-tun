@@ -140,11 +140,11 @@ impl Device {
     }
 
 	    /// Set the IPv4 alias of the device.
-		pub fn set_alias(&mut self, addr: IpAddr, broadaddr: IpAddr, mask: IpAddr) -> Result<()> {
+		pub fn set_alias(&mut self, addr: IpAddr, dest: IpAddr, mask: IpAddr) -> Result<()> {
 			let IpAddr::V4(addr) = addr else {
 				unimplemented!("do not support IPv6 yet")
 			};
-			let IpAddr::V4(broadaddr) = broadaddr else {
+			let IpAddr::V4(dest) = dest else {
 				unimplemented!("do not support IPv6 yet")
 			};
 			let IpAddr::V4(mask) = mask else {
@@ -161,7 +161,7 @@ impl Device {
 				);
 	
 				req.ifra_addr = SockAddr::from(addr).into();
-				req.ifra_dstaddr = SockAddr::from(broadaddr).into();
+				req.ifra_dstaddr = SockAddr::from(dest).into();
 				req.ifra_mask = SockAddr::from(mask).into();
 	
 				if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
