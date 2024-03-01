@@ -122,6 +122,18 @@ impl Device {
             }
         };
 
+        device.set_alias(
+            config
+                .address
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
+            config
+                .destination
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
+            config
+                .netmask
+                .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
+        )?;
+
         device.configure(config)?;
 
         Ok(device)
@@ -138,7 +150,7 @@ impl Device {
 			let IpAddr::V4(mask) = mask else {
 				unimplemented!("do not support IPv6 yet")
 			};
-			let tun_name = self.tun_name.as_ref().ok_or(Error::InvalidConfig)?;
+			let tun_name:&String = self.tun_name.as_ref().ok_or(Error::InvalidConfig)?;
 			let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
 			unsafe {
 				let mut req: ifaliasreq = mem::zeroed();
