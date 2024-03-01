@@ -161,6 +161,7 @@ impl Device {
 				);
 
 				if let Err(err) = siocdifaddr(ctl.as_raw_fd(), &req) {
+					println!("siocdifaddr delete");
 					return Err(io::Error::from(err).into());
 				}
 	
