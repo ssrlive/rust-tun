@@ -77,7 +77,7 @@ impl Device {
                 None => None,
             };
 
-            // let mut req: ifreq = mem::zeroed();
+            let mut req: ifreq = mem::zeroed();
 
             // if let Some(dev) = dev.as_ref() {
             //     ptr::copy_nonoverlapping(
@@ -124,11 +124,19 @@ impl Device {
 				} 
             };
 
+			ptr::copy_nonoverlapping(
+				device_name.as_ptr() as *const c_char,
+				req.ifr_name.as_mut_ptr(),
+				device_name.as_bytes().len(),
+			);
+
 			println!("{:?}",device_name);
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
-            let tun_name = device_name;
+            let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
+			.to_string_lossy()
+			.to_string();
             Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
