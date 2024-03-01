@@ -98,6 +98,7 @@ impl Device {
 								let device_name = format!("tun{i}");
 								let device_path = format!("/dev/{device_name}\0");
 								let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
+								println!("{}",fd);
 								if fd > 0{
 									let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 									return Ok((tun, device_name));
