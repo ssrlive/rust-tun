@@ -153,7 +153,7 @@ impl Device {
 			let tun_name:&String = &self.tun_name;
 			let ctl = &self.ctl;
 			unsafe {
-				let mut req: in_aliasreq = mem::zeroed();
+				let mut req: ifaliasreq = mem::zeroed();
 				ptr::copy_nonoverlapping(
 					tun_name.as_ptr() as *const c_char,
 					req.ifran.as_mut_ptr(),
