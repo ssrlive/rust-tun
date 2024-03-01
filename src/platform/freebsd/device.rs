@@ -83,8 +83,6 @@ impl Device {
             }
 
 
-			let dev_name = dev.unwrap();
-
 			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
             let (tun,device_name) = {
