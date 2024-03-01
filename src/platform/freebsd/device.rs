@@ -270,7 +270,7 @@ impl AbstractDevice for Device {
                 return Err(Error::NameTooLong);
             }
             let mut req = self.request();
-            let mut tun_name = CString::new(value)?;
+            let tun_name = CString::new(value)?;
             let mut tun_name: Vec<i8> = tun_name
                 .into_bytes_with_nul()
                 .into_iter()
