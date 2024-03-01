@@ -96,7 +96,7 @@ impl Device {
 						let find_fd = ||{
 							for i in 0..256{
 								let device_name = format!("tun{i}");
-								let device_path = format!("/dev/{device_name}\0");
+								let device_path = format!("/dev/tun0\0");
 								let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
 								println!("{}",fd);
 								if fd > 0{
