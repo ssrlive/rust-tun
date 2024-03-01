@@ -92,7 +92,6 @@ impl Device {
 					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 					(tun,name.clone())
 				}else{
-					let result = {
 						let (tun, device_name) = 'End:{
 							for i in 0..256{
 								let device_name = format!("tun{i}");
@@ -106,7 +105,6 @@ impl Device {
 							}
 							return Err(Error::InvalidName);
 						};
-					};
 					(tun, device_name)
 				} 
             };
