@@ -271,6 +271,7 @@ impl AbstractDevice for Device {
             }
 			let mut req = self.request();
 			let mut tun_name = CString::new(value)?;
+			let mut tun_name = tun_name.into_bytes_with_nul();
 			req.ifr_ifru.ifru_data = tun_name.as_mut_ptr();
 			if let Err(err) = siocsifname(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
