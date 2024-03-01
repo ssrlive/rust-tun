@@ -151,7 +151,7 @@ impl Device {
 				unimplemented!("do not support IPv6 yet")
 			};
 			let tun_name:&String = &self.tun_name;
-			let ctl = self.ctl.as_ref();
+			let ctl = &self.ctl;
 			unsafe {
 				let mut req: ifaliasreq = mem::zeroed();
 				ptr::copy_nonoverlapping(
