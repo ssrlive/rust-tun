@@ -178,12 +178,12 @@ impl Device {
         req
     }
 
-	unsafe fn alias_request()->ifaliasreq{
+	unsafe fn alias_request(&self)->ifaliasreq{
 		let mut req: ifaliasreq = mem::zeroed();
 		ptr::copy_nonoverlapping(
-			tun_name.as_ptr() as *const c_char,
+			self.tun_name.as_ptr() as *const c_char,
 			req.ifran.as_mut_ptr(),
-			tun_name.len(),
+			self.tun_name.len(),
 		);
 		req
 	}
