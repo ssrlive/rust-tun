@@ -153,17 +153,7 @@ impl Device {
 			let tun_name:&String = &self.tun_name;
 			let ctl = &self.ctl;
 			unsafe {
-				let mut req: ifaliasreq = mem::zeroed();
-				ptr::copy_nonoverlapping(
-					tun_name.as_ptr() as *const c_char,
-					req.ifran.as_mut_ptr(),
-					tun_name.len(),
-				);
-
-				if let Err(err) = siocdifaddr(ctl.as_raw_fd(), &req) {
-					println!("siocdifaddr delete");
-					return Err(io::Error::from(err).into());
-				}
+				let mut req: ifaliasreq = self.alias_request();
 	
 				req.addr = SockAddr::from(addr).into();
 				req.broadaddr = SockAddr::from(dest).into();
@@ -187,6 +177,16 @@ impl Device {
 
         req
     }
+
+	unsafe fn alias_request()->ifaliasreq{
+		let mut req: ifaliasreq = mem::zeroed();
+		ptr::copy_nonoverlapping(
+			tun_name.as_ptr() as *const c_char,
+			req.ifran.as_mut_ptr(),
+			tun_name.len(),
+		);
+		req
+	}
 
     /// Split the interface into a `Reader` and `Writer`.
     pub fn split(self) -> (posix::Reader, posix::Writer) {
@@ -269,6 +269,11 @@ impl AbstractDevice for Device {
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
+		let mut req = self.alias_request();
+		if let Err(err) = siocdifaddr(ctl.as_raw_fd(), &req) {
+			println!("delete previous addr");
+			return Err(io::Error::from(err).into());
+		}
 		self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 9)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
 		Ok(())
         // println!("set_address");
