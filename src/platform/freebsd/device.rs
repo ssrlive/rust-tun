@@ -32,12 +32,19 @@ use crate::{
     platform::posix::{self, Fd, SockAddr, Tun},
 };
 
+#[derive(Clone, Copy)]
+struct Route {
+    addr: Ipv4Addr,
+    netmask: Ipv4Addr,
+    dest: Ipv4Addr,
+}
+
 /// A TUN device using the TUN/TAP Linux driver.
 pub struct Device {
     tun_name: String,
     tun: Tun,
     ctl: Fd,
-    packet_information: bool,
+	route: Option<Route>,
 }
 
 impl AsRef<dyn AbstractDevice + 'static> for Device {
@@ -118,7 +125,6 @@ impl Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
                 ctl,
-                packet_information: false,
             }
         };
 
@@ -167,6 +173,16 @@ impl Device {
 				if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
 					return Err(io::Error::from(err).into());
 				}
+
+				let route = Route {
+					addr,
+					netmask: mask,
+					dest: broadaddr,
+				};
+				if let Err(e) = self.set_route(route) {
+					log::warn!("{e:?}");
+				}
+
 				Ok(())
 			}
 		}
@@ -191,6 +207,41 @@ impl Device {
     /// Set non-blocking mode
     pub fn set_nonblock(&self) -> io::Result<()> {
         self.tun.set_nonblock()
+    }
+
+	fn set_route(&mut self, route: Route) -> Result<()> {
+        if let Some(v) = &self.route {
+            let prefix_len = ipnet::ip_mask_to_prefix(IpAddr::V4(v.netmask))
+                .map_err(|_| Error::InvalidConfig)?;
+            let network = ipnet::Ipv4Net::new(v.addr, prefix_len)
+                .map_err(|e| Error::InvalidConfig)?
+                .network();
+            // command: route -n delete -net 10.0.0.0/24 10.0.0.1
+            let args = [
+                "-n",
+                "delete",
+                "-net",
+                &format!("{}/{}", network, prefix_len),
+                &v.dest.to_string(),
+            ];
+            run_command("route", &args)?;
+            log::info!("route {}", args.join(" "));
+        }
+
+        // command: route -n add -net 10.0.0.9/24 10.0.0.1
+        let prefix_len = ipnet::ip_mask_to_prefix(IpAddr::V4(route.netmask))
+            .map_err(|_| Error::InvalidConfig)?;
+        let args = [
+            "-n",
+            "add",
+            "-net",
+            &format!("{}/{}", route.addr, prefix_len),
+            &route.dest.to_string(),
+        ];
+        run_command("route", &args)?;
+        log::info!("route {}", args.join(" "));
+        self.route = Some(route);
+        Ok(())
     }
 }
 
@@ -270,7 +321,10 @@ impl AbstractDevice for Device {
 				println!("delete previous addr");
 				return Err(io::Error::from(err).into());
 			}
-			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 9)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
+			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+			if let Some(v) = &self.route {
+				self.set_alias(value,IpAddr::V4(previous.dest),IpAddr::V4(previous.netmask))?;
+			}
 		}
 		Ok(())
     }
@@ -295,7 +349,10 @@ impl AbstractDevice for Device {
 			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
 				return Err(io::Error::from(err).into());
 			}
-			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 8)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
+			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+			if let Some(v) = &self.route {
+				self.set_alias(IpAddr::V4(previous.addr),value,IpAddr::V4(previous.netmask))?;
+			}
 		}
 		Ok(())
     }
@@ -338,7 +395,10 @@ impl AbstractDevice for Device {
 			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
 				return Err(io::Error::from(err).into());
 			}
-			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 8)),IpAddr::V4(Ipv4Addr::new(255, 255, 0, 0)))?;
+			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+			if let Some(v) = &self.route {
+				self.set_alias(IpAddr::V4(previous.addr),IpAddr::V4(previous.dest),value)?;
+			}
 		}
 		Ok(())
     }
@@ -372,7 +432,7 @@ impl AbstractDevice for Device {
     }
 
     fn packet_information(&self) -> bool {
-        self.packet_information
+        false
     }
 }
 
@@ -395,4 +455,20 @@ impl From<Layer> for c_short {
             Layer::L3 => 3,
         }
     }
+}
+
+/// Runs a command and returns an error if the command fails, just convenience for users.
+#[doc(hidden)]
+pub fn run_command(command: &str, args: &[&str]) -> std::io::Result<Vec<u8>> {
+    let out = std::process::Command::new(command).args(args).output()?;
+    if !out.status.success() {
+        let err = String::from_utf8_lossy(if out.stderr.is_empty() {
+            &out.stdout
+        } else {
+            &out.stderr
+        });
+        let info = format!("{} failed with: \"{}\"", command, err);
+        return Err(std::io::Error::new(std::io::ErrorKind::Other, info));
+    }
+    Ok(out.stdout)
 }
