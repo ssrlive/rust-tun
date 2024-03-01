@@ -273,7 +273,7 @@ impl AbstractDevice for Device {
             let mut req = self.request();
             req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
 			println!("{req:?}");  
-            if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), &req) {
+            if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), & mut req) {
 				println!("set addr error");
                 return Err(io::Error::from(err).into());
             }

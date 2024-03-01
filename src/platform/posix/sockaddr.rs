@@ -46,7 +46,7 @@ impl SockAddr {
 impl From<Ipv4Addr> for SockAddr {
     fn from(ip: Ipv4Addr) -> SockAddr {
         let octets = ip.octets();
-		println!("{}",u32::from_ne_bytes(octets));
+		
         let mut addr = unsafe { mem::zeroed::<sockaddr_in>() };
 
         addr.sin_family = libc::AF_INET as libc::sa_family_t;
