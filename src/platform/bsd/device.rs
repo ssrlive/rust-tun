@@ -113,7 +113,7 @@ impl Device {
 				req.ifr_ifru.ifru_addr = SockAddr::from(Ipv4Addr::new(10, 0, 0, 9)).into();
 				println!("{req:?}");  
 				if let Err(err) = siocsifaddr(ctl.as_raw_fd(), & mut req) {
-					println!("set addr error");
+					println!("set addr error in 116");
 					return Err(io::Error::from(err).into());
 				}
 			}
