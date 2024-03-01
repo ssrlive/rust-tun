@@ -85,7 +85,7 @@ impl Device {
 
 			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
-            let (tun,device_name) = {
+            let (tun,tun_name) = {
 				if let Some(name) = dev.as_ref(){
 					let device_path = format!("/dev/{}\0",name);
 					let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
@@ -97,7 +97,6 @@ impl Device {
 								let device_name = format!("tun{i}");
 								let device_path = format!("/dev/{device_name}\0");
 								let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
-								println!("{}",fd);
 								if fd > 0{
 									let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 									break 'End (tun, device_name);
@@ -111,7 +110,6 @@ impl Device {
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
-			let tun_name = device_name;
             Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
