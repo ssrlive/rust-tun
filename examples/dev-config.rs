@@ -61,9 +61,9 @@ fn main_entry(quit: Receiver<()>) -> Result<(), BoxError> {
     dev.set_destination(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 66)))?;
     dev.set_netmask(std::net::IpAddr::V4(Ipv4Addr::new(255, 255, 0, 0)))?;
 
-	dev.set_tun_name("tun3")?;
+	//dev.set_tun_name("tun3")?;
 
-	dev.set_address(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 21)))?;
+	//dev.set_address(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 21)))?;
 
     // let r = dev.broadcast()?;
     // println!("{:?}",r);
