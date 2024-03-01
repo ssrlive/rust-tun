@@ -12,11 +12,10 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-
-use std::{net::Ipv4Addr, sync::mpsc::Receiver};
-use tun2::{AbstractDevice, BoxError};
 use packet::{builder::Builder, icmp, ip, Packet};
 use std::io::{Read, Write};
+use std::{net::Ipv4Addr, sync::mpsc::Receiver};
+use tun2::{AbstractDevice, BoxError};
 
 fn main() -> Result<(), BoxError> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("trace")).init();
@@ -48,23 +47,23 @@ fn main_entry(quit: Receiver<()>) -> Result<(), BoxError> {
     });
 
     let mut dev = tun2::create(&config)?;
-	let r = dev.address()?;
-	println!("{:?}",r);
+    let r = dev.address()?;
+    println!("{:?}", r);
 
-	let r = dev.destination()?;
-	println!("{:?}",r);
+    let r = dev.destination()?;
+    println!("{:?}", r);
 
-	let r = dev.netmask()?;
-	println!("{:?}",r);
+    let r = dev.netmask()?;
+    println!("{:?}", r);
 
-	dev.set_address(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 20)))?;
-	dev.set_destination(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 66)))?;
-	dev.set_netmask(std::net::IpAddr::V4(Ipv4Addr::new(255, 255, 0, 0)))?;
+    dev.set_address(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 20)))?;
+    dev.set_destination(std::net::IpAddr::V4(Ipv4Addr::new(10, 0, 0, 66)))?;
+    dev.set_netmask(std::net::IpAddr::V4(Ipv4Addr::new(255, 255, 0, 0)))?;
 
-	// let r = dev.broadcast()?;
-	// println!("{:?}",r);
+    // let r = dev.broadcast()?;
+    // println!("{:?}",r);
 
-	let mut buf = [0; 4096];
+    let mut buf = [0; 4096];
 
     std::thread::spawn(move || {
         loop {
