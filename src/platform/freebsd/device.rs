@@ -124,6 +124,8 @@ impl Device {
 				} 
             };
 
+			println!("{:?}",device_name);
+
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
             let tun_name = device_name;
