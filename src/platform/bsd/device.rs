@@ -228,13 +228,13 @@ impl AbstractDevice for Device {
     }
 
     fn enabled(&mut self, value: bool) -> Result<()> {
-        println!("invoke enabled");
         unsafe {
             let mut req = self.request();
 
             if let Err(err) = siocgifflags(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
+			println!("{req:?}");
 
             if value {
                 req.ifr_ifru.ifru_flags[0] |= (IFF_UP | IFF_RUNNING) as c_short;
@@ -395,7 +395,6 @@ impl AbstractDevice for Device {
     }
 
     fn set_mtu(&mut self, value: u16) -> Result<()> {
-        println!("set_mtu");
         unsafe {
             let mut req = self.request();
             req.ifr_ifru.ifru_mtu = value as i32;
