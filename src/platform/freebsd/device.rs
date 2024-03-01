@@ -77,16 +77,16 @@ impl Device {
                 None => Some(CString::new("tun0")?),
             };
 
-            let mut req: ifreq = mem::zeroed();
+            // let mut req: ifreq = mem::zeroed();
 
-            if let Some(dev) = dev.as_ref() {
-				//println!("len ={}", dev.as_bytes().len());
-                ptr::copy_nonoverlapping(
-                    dev.as_ptr() as *const c_char,
-                    req.ifr_name.as_mut_ptr(),
-                    dev.as_bytes().len(),
-                );
-            }
+            // if let Some(dev) = dev.as_ref() {
+			// 	//println!("len ={}", dev.as_bytes().len());
+            //     ptr::copy_nonoverlapping(
+            //         dev.as_ptr() as *const c_char,
+            //         req.ifr_name.as_mut_ptr(),
+            //         dev.as_bytes().len(),
+            //     );
+            // }
 
             //let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
 
@@ -118,9 +118,10 @@ impl Device {
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
-            let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
-                .to_string_lossy()
-                .to_string();
+            // let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
+            //     .to_string_lossy()
+            //     .to_string();
+			let tun_name = String::from("tun0");
             Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
