@@ -101,7 +101,7 @@ impl Device {
             // high 16 bits
             //req.ifr_ifru.ifru_flags[1] = 1;
 
-			let dev_name = dev.unwrap().into_string().unwrap();
+			let dev_name = dev.unwrap();
 
 			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
