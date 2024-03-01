@@ -278,7 +278,7 @@ impl AbstractDevice for Device {
                 return Err(io::Error::from(err).into());
             }
 
-            self.tun_name = value;
+            self.tun_name = value.to_string();
 
 			Ok(())
 		}
