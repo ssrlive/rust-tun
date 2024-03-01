@@ -73,7 +73,7 @@ impl Device {
             let mut req: ifreq = mem::zeroed();
 
             if let Some(dev) = dev.as_ref() {
-				println!("len ={}", dev.as_bytes().len());
+				//println!("len ={}", dev.as_bytes().len());
                 ptr::copy_nonoverlapping(
                     dev.as_ptr() as *const c_char,
                     req.ifr_name.as_mut_ptr(),
@@ -156,13 +156,13 @@ impl Device {
 				let mut req: in_aliasreq = mem::zeroed();
 				ptr::copy_nonoverlapping(
 					tun_name.as_ptr() as *const c_char,
-					req.ifra_name.as_mut_ptr(),
+					req.ifran.as_mut_ptr(),
 					tun_name.len(),
 				);
 	
-				req.ifra_addr = SockAddr::from(addr).into();
-				req.ifra_dstaddr = SockAddr::from(dest).into();
-				req.ifra_mask = SockAddr::from(mask).into();
+				req.addr = SockAddr::from(addr).into();
+				req.broadaddr = SockAddr::from(dest).into();
+				req.mask = SockAddr::from(mask).into();
 	
 				if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
 					return Err(io::Error::from(err).into());
@@ -234,7 +234,6 @@ impl AbstractDevice for Device {
             if let Err(err) = siocgifflags(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-			println!("{req:?}");
 
             if value {
                 req.ifr_ifru.ifru_flags[0] |= (IFF_UP | IFF_RUNNING) as c_short;
