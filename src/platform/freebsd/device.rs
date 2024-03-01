@@ -65,28 +65,27 @@ impl Device {
         let mut device = unsafe {
             let dev = match config.tun_name.as_ref() {
                 Some(tun_name) => {
-                    let tun_name = CString::new(tun_name.clone())?;
+                    let tun_name = tun_name.clone();
 
-                    if tun_name.as_bytes_with_nul().len() > IFNAMSIZ {
+                    if tun_name.len() > IFNAMSIZ {
                         return Err(Error::NameTooLong);
                     }
 
                     Some(tun_name)
                 }
 
-                None => Some(CString::new("tun0")?),
+                None => None,
             };
 
-            let mut req: ifreq = mem::zeroed();
+            // let mut req: ifreq = mem::zeroed();
 
-            if let Some(dev) = dev.as_ref() {
-				//println!("len ={}", dev.as_bytes().len());
-                ptr::copy_nonoverlapping(
-                    dev.as_ptr() as *const c_char,
-                    req.ifr_name.as_mut_ptr(),
-                    dev.as_bytes().len(),
-                );
-            }
+            // if let Some(dev) = dev.as_ref() {
+            //     ptr::copy_nonoverlapping(
+            //         dev.as_ptr() as *const c_char,
+            //         req.ifr_name.as_mut_ptr(),
+            //         dev.as_bytes().len(),
+            //     );
+            // }
 
             //let device_type: c_short = config.layer.unwrap_or(Layer::L3).into();
 
@@ -101,26 +100,32 @@ impl Device {
             // high 16 bits
             //req.ifr_ifru.ifru_flags[1] = 1;
 
-			let dev_name = dev.unwrap().into_string().unwrap();
-
 			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
-            let tun = {
-				let device = format!("/dev/{dev_name}\0");
-                let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
-                let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-				// if let Err(err) = siocgifflags(ctl.0, &mut req as *mut _ as *mut _) {
-				// 	return Err(io::Error::from(err).into());
-				// }
-				// println!("{:?}",req);   
-                tun
+            let (tun,device_name) = {
+				if let Some(name) = dev.as_ref(){
+					let device_name = format!("/dev/{}\0",name);
+					let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
+					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+					(tun,device_name)
+				}else{
+					let (tun, device_name) = 'End:{
+						for i in 0..256{
+							let device_name = format!("/dev/tun{i}\0");
+							if libc::open(device_name.as_ptr() as *const _, O_RDWR) as _ > 0{
+								let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+								break (tun, device_name)
+							}
+						}
+						return Err(Error::InvalidName);
+					};
+					(tun, device_name)
+				} 
             };
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
-            let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
-                .to_string_lossy()
-                .to_string();
+            let tun_name = device_name;
             Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
@@ -318,7 +323,7 @@ impl AbstractDevice for Device {
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
 		unsafe{
 			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), & mut req) {
 				println!("delete previous addr");
 				return Err(io::Error::from(err).into());
 			}
@@ -345,7 +350,7 @@ impl AbstractDevice for Device {
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
 		unsafe{
 			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), & mut req) {
 				return Err(io::Error::from(err).into());
 			}
 			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
@@ -389,7 +394,7 @@ impl AbstractDevice for Device {
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
 		unsafe{
 			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), & mut req) {
 				return Err(io::Error::from(err).into());
 			}
 			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
