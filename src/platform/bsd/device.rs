@@ -122,19 +122,19 @@ impl Device {
             }
         };
 
-        device.set_alias(
-            config
-                .address
-                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
-            config
-                .destination
-                .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
-            config
-                .netmask
-                .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
-        )?;
+        // device.set_alias(
+        //     config
+        //         .address
+        //         .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1))),
+        //     config
+        //         .destination
+        //         .unwrap_or(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 255))),
+        //     config
+        //         .netmask
+        //         .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
+        // )?;
 
-        //device.configure(config)?;
+        device.configure(config)?;
 
         Ok(device)
     }
@@ -273,7 +273,7 @@ impl AbstractDevice for Device {
             let mut req = self.request();
             req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
 			println!("{req:?}");  
-            if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), &req) {
+            if let Err(err) = siocaifaddr(self.ctl.as_raw_fd(), &req) {
 				println!("set addr error");
                 return Err(io::Error::from(err).into());
             }
