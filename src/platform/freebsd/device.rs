@@ -269,12 +269,14 @@ impl AbstractDevice for Device {
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-		let mut req = self.alias_request();
-		if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
-			println!("delete previous addr");
-			return Err(io::Error::from(err).into());
+		unsafe{
+			let mut req = self.alias_request();
+			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+				println!("delete previous addr");
+				return Err(io::Error::from(err).into());
+			}
+			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 9)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
 		}
-		self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 9)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
 		Ok(())
         // println!("set_address");
         // let IpAddr::V4(value) = value else {
