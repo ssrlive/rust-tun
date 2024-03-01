@@ -19,7 +19,7 @@ use std::{
     ffi::{CStr, CString},
     io::{self, Read, Write},
     mem,
-    net::IpAddr,
+	net::{IpAddr, Ipv4Addr},
     os::unix::io::{AsRawFd, IntoRawFd, RawFd},
     ptr,
 };
