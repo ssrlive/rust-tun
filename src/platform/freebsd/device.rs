@@ -264,16 +264,14 @@ impl AbstractDevice for Device {
     }
 
     fn set_tun_name(&mut self, value: &str) -> Result<()> {
+		use std::ffi::CString;
 		unsafe{
 			if value.len() > IFNAMSIZ {
                 return Err(Error::NameTooLong);
             }
 			let mut req = self.request();
-			ptr::copy_nonoverlapping(
-                value.as_ptr() as *const c_char,
-                req.ifr_ifru.ifru_newname.as_mut_ptr(),
-                value.len(),
-            );
+			let mut tun_name = CString::new(value)?;
+			req.ifr_ifru.ifru_data = tun_name.as_mut_ptr();
 			if let Err(err) = siocsifname(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
