@@ -93,7 +93,7 @@ impl Device {
 					(tun,name.clone())
 				}else{
 					let result = {
-						let find_fd = ||{
+						let (tun, device_name) = 'End:{
 							for i in 0..256{
 								let device_name = format!("tun{i}");
 								let device_path = format!("/dev/{device_name}\0");
@@ -101,14 +101,12 @@ impl Device {
 								println!("{}",fd);
 								if fd > 0{
 									let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-									return Ok((tun, device_name));
+									break 'End (tun, device_name);
 								}
 							}
 							return Err(Error::InvalidName);
 						};
-						find_fd()
 					};
-					let (tun, device_name) = result?;
 					(tun, device_name)
 				} 
             };
