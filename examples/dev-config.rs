@@ -36,6 +36,7 @@ fn main_entry(quit: Receiver<()>) -> Result<(), BoxError> {
     let mut config = tun2::Configuration::default();
 
     config
+	    .tun_name("tun2")
         .address((10, 0, 0, 9))
         .netmask((255, 255, 255, 0))
         .destination((10, 0, 0, 1))
