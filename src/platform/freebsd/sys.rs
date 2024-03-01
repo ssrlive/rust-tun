@@ -33,7 +33,7 @@ pub struct ifaliasreq {
     pub addr: sockaddr,
     pub dstaddr: sockaddr,
     pub mask: sockaddr,
-	pub ifra_vhid:c_int
+    pub ifra_vhid: c_int,
 }
 
 // #[allow(non_camel_case_types)]

@@ -16,10 +16,10 @@ use libc::{
     self, c_char, c_short, ifreq, AF_INET, IFF_RUNNING, IFF_UP, IFNAMSIZ, O_RDWR, SOCK_DGRAM,
 };
 use std::{
-    ffi::{CStr, CString},
+    // ffi::{CStr, CString},
     io::{self, Read, Write},
     mem,
-	net::{IpAddr, Ipv4Addr},
+    net::{IpAddr, Ipv4Addr},
     os::unix::io::{AsRawFd, IntoRawFd, RawFd},
     ptr,
 };
@@ -44,7 +44,7 @@ pub struct Device {
     tun_name: String,
     tun: Tun,
     ctl: Fd,
-	route: Option<Route>,
+    route: Option<Route>,
 }
 
 impl AsRef<dyn AbstractDevice + 'static> for Device {
@@ -82,30 +82,29 @@ impl Device {
                 return Err(Error::InvalidQueuesNumber);
             }
 
+            let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
-			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
-
-            let (tun,tun_name) = {
-				if let Some(name) = dev.as_ref(){
-					let device_path = format!("/dev/{}\0",name);
-					let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
-					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-					(tun,name.clone())
-				}else{
-						let (tun, device_name) = 'End:{
-							for i in 0..256{
-								let device_name = format!("tun{i}");
-								let device_path = format!("/dev/{device_name}\0");
-								let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
-								if fd > 0{
-									let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-									break 'End (tun, device_name);
-								}
-							}
-							return Err(Error::InvalidName);
-						};
-					(tun, device_name)
-				} 
+            let (tun, tun_name) = {
+                if let Some(name) = dev.as_ref() {
+                    let device_path = format!("/dev/{}\0", name);
+                    let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
+                    let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+                    (tun, name.clone())
+                } else {
+                    let (tun, device_name) = 'End: {
+                        for i in 0..256 {
+                            let device_name = format!("tun{i}");
+                            let device_path = format!("/dev/{device_name}\0");
+                            let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
+                            if fd > 0 {
+                                let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+                                break 'End (tun, device_name);
+                            }
+                        }
+                        return Err(Error::InvalidName);
+                    };
+                    (tun, device_name)
+                }
             };
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
@@ -114,7 +113,7 @@ impl Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
                 ctl,
-				route: None,
+                route: None,
             }
         };
 
@@ -135,46 +134,46 @@ impl Device {
         Ok(device)
     }
 
-	    /// Set the IPv4 alias of the device.
-		fn set_alias(&mut self, addr: IpAddr, dest: IpAddr, mask: IpAddr) -> Result<()> {
-			let IpAddr::V4(addr) = addr else {
-				unimplemented!("do not support IPv6 yet")
-			};
-			let IpAddr::V4(dest) = dest else {
-				unimplemented!("do not support IPv6 yet")
-			};
-			let IpAddr::V4(mask) = mask else {
-				unimplemented!("do not support IPv6 yet")
-			};
-			let ctl = &self.ctl;
-			unsafe {
-				let mut req: ifaliasreq = mem::zeroed();
-				ptr::copy_nonoverlapping(
-					self.tun_name.as_ptr() as *const c_char,
-					req.ifran.as_mut_ptr(),
-					self.tun_name.len(),
-				);
-	
-				req.addr = SockAddr::from(addr).into();
-				req.dstaddr = SockAddr::from(dest).into();
-				req.mask = SockAddr::from(mask).into();
-	
-				if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
-					return Err(io::Error::from(err).into());
-				}
+    /// Set the IPv4 alias of the device.
+    fn set_alias(&mut self, addr: IpAddr, dest: IpAddr, mask: IpAddr) -> Result<()> {
+        let IpAddr::V4(addr) = addr else {
+            unimplemented!("do not support IPv6 yet")
+        };
+        let IpAddr::V4(dest) = dest else {
+            unimplemented!("do not support IPv6 yet")
+        };
+        let IpAddr::V4(mask) = mask else {
+            unimplemented!("do not support IPv6 yet")
+        };
+        let ctl = &self.ctl;
+        unsafe {
+            let mut req: ifaliasreq = mem::zeroed();
+            ptr::copy_nonoverlapping(
+                self.tun_name.as_ptr() as *const c_char,
+                req.ifran.as_mut_ptr(),
+                self.tun_name.len(),
+            );
 
-				let route = Route {
-					addr,
-					netmask: mask,
-					dest: dest,
-				};
-				if let Err(e) = self.set_route(route) {
-					log::warn!("{e:?}");
-				}
+            req.addr = SockAddr::from(addr).into();
+            req.dstaddr = SockAddr::from(dest).into();
+            req.mask = SockAddr::from(mask).into();
 
-				Ok(())
-			}
-		}
+            if let Err(err) = siocaifaddr(ctl.as_raw_fd(), &req) {
+                return Err(io::Error::from(err).into());
+            }
+
+            let route = Route {
+                addr,
+                netmask: mask,
+                dest: dest,
+            };
+            if let Err(e) = self.set_route(route) {
+                log::warn!("{e:?}");
+            }
+
+            Ok(())
+        }
+    }
 
     /// Prepare a new request.
     unsafe fn request(&self) -> ifreq {
@@ -198,7 +197,7 @@ impl Device {
         self.tun.set_nonblock()
     }
 
-	fn set_route(&mut self, route: Route) -> Result<()> {
+    fn set_route(&mut self, route: Route) -> Result<()> {
         // if let Some(v) = &self.route {
         //     let prefix_len = ipnet::ip_mask_to_prefix(IpAddr::V4(v.netmask))
         //         .map_err(|_| Error::InvalidConfig)?;
@@ -213,7 +212,7 @@ impl Device {
         //         &format!("{}/{}", network, prefix_len),
         //         &v.dest.to_string(),
         //     ];
-		// 	println!("{args:?}");
+        // 	println!("{args:?}");
         //     run_command("route", &args);
         //     log::info!("route {}", args.join(" "));
         // }
@@ -305,16 +304,20 @@ impl AbstractDevice for Device {
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-		unsafe{
-			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), & mut req) {
-				println!("delete previous addr");
-				return Err(io::Error::from(err).into());
-			}
-			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			self.set_alias(value,IpAddr::V4(previous.dest),IpAddr::V4(previous.netmask))?;
-		}
-		Ok(())
+        unsafe {
+            let mut req = self.request();
+            if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &mut req) {
+                println!("delete previous addr");
+                return Err(io::Error::from(err).into());
+            }
+            let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+            self.set_alias(
+                value,
+                IpAddr::V4(previous.dest),
+                IpAddr::V4(previous.netmask),
+            )?;
+        }
+        Ok(())
     }
 
     fn destination(&self) -> Result<IpAddr> {
@@ -332,15 +335,19 @@ impl AbstractDevice for Device {
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-		unsafe{
-			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), & mut req) {
-				return Err(io::Error::from(err).into());
-			}
-			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			self.set_alias(IpAddr::V4(previous.addr),value,IpAddr::V4(previous.netmask))?;
-		}
-		Ok(())
+        unsafe {
+            let mut req = self.request();
+            if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &mut req) {
+                return Err(io::Error::from(err).into());
+            }
+            let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+            self.set_alias(
+                IpAddr::V4(previous.addr),
+                value,
+                IpAddr::V4(previous.netmask),
+            )?;
+        }
+        Ok(())
     }
 
     fn broadcast(&self) -> Result<IpAddr> {
@@ -357,8 +364,8 @@ impl AbstractDevice for Device {
         }
     }
 
-    fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
-		Ok(())
+    fn set_broadcast(&mut self, _value: IpAddr) -> Result<()> {
+        Ok(())
     }
 
     fn netmask(&self) -> Result<IpAddr> {
@@ -376,15 +383,15 @@ impl AbstractDevice for Device {
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-		unsafe{
-			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), & mut req) {
-				return Err(io::Error::from(err).into());
-			}
-			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			self.set_alias(IpAddr::V4(previous.addr),IpAddr::V4(previous.dest),value)?;
-		}
-		Ok(())
+        unsafe {
+            let mut req = self.request();
+            if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &mut req) {
+                return Err(io::Error::from(err).into());
+            }
+            let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+            self.set_alias(IpAddr::V4(previous.addr), IpAddr::V4(previous.dest), value)?;
+        }
+        Ok(())
     }
 
     fn mtu(&self) -> Result<u16> {
