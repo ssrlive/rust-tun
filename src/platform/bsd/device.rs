@@ -134,13 +134,13 @@ impl Device {
                 .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
         )?;
 
-        //device.configure(config)?;
+        device.configure(config)?;
 
         Ok(device)
     }
 
 	    /// Set the IPv4 alias of the device.
-		pub fn set_alias(&mut self, addr: IpAddr, dest: IpAddr, mask: IpAddr) -> Result<()> {
+		fn set_alias(&mut self, addr: IpAddr, dest: IpAddr, mask: IpAddr) -> Result<()> {
 			let IpAddr::V4(addr) = addr else {
 				unimplemented!("do not support IPv6 yet")
 			};
