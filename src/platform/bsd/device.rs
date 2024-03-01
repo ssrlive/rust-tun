@@ -150,8 +150,8 @@ impl Device {
 			let IpAddr::V4(mask) = mask else {
 				unimplemented!("do not support IPv6 yet")
 			};
-			let tun_name:&String = self.tun_name.as_ref().ok_or(Error::InvalidConfig)?;
-			let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
+			let tun_name:&String = &self.tun_name;
+			let ctl = self.ctl.as_ref();
 			unsafe {
 				let mut req: ifaliasreq = mem::zeroed();
 				ptr::copy_nonoverlapping(
