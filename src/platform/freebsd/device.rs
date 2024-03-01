@@ -159,6 +159,10 @@ impl Device {
 					req.ifran.as_mut_ptr(),
 					tun_name.len(),
 				);
+
+				if let Err(err) = siocdifaddr(ctl.as_raw_fd(), &req) {
+					return Err(io::Error::from(err).into());
+				}
 	
 				req.addr = SockAddr::from(addr).into();
 				req.broadaddr = SockAddr::from(dest).into();
@@ -264,21 +268,23 @@ impl AbstractDevice for Device {
     }
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
-        println!("set_address");
-        let IpAddr::V4(value) = value else {
-            unimplemented!("do not support IPv6 yet")
-        };
-        unsafe {
-            let mut req = self.request();
-            req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
-			println!("{req:?}");  
-            if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), & mut req) {
-				println!("set addr error");
-                return Err(io::Error::from(err).into());
-            }
+		self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 9)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
+		Ok(())
+        // println!("set_address");
+        // let IpAddr::V4(value) = value else {
+        //     unimplemented!("do not support IPv6 yet")
+        // };
+        // unsafe {
+        //     let mut req = self.request();
+        //     req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
+		// 	println!("{req:?}");  
+        //     if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), & mut req) {
+		// 		println!("set addr error");
+        //         return Err(io::Error::from(err).into());
+        //     }
 
-            Ok(())
-        }
+        //     Ok(())
+        // }
     }
 
     fn destination(&self) -> Result<IpAddr> {
