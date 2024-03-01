@@ -269,6 +269,7 @@ impl AbstractDevice for Device {
         //     unimplemented!("do not support IPv6 yet")
         // };
 		self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 1)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
+		Ok(())
         // unsafe {
         //     let mut req = self.request();
         //     req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
