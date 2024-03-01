@@ -1,7 +1,7 @@
 //            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-//                    Version 2, December 2004
+//                    Version 2, March 2024
 //
-// Copyleft (ↄ) meh. <meh@schizofreni.co> | http://meh.schizofreni.co
+// Copyleft (ↄ) xmh. <970252187@qq.com>
 //
 // Everyone is permitted to copy and distribute verbatim or modified
 // copies of this license document, and changing it is allowed as long
