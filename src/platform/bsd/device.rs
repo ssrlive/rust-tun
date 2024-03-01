@@ -109,15 +109,6 @@ impl Device {
                 tun
             };
 
-			unsafe {
-				req.ifr_ifru.ifru_addr = SockAddr::from(Ipv4Addr::new(10, 0, 0, 9)).into();
-				println!("{req:?}");  
-				if let Err(err) = siocsifaddr(ctl.0, & mut req as *mut _ as *mut _) {
-					println!("set addr error in 116");
-					return Err(io::Error::from(err).into());
-				}
-			}
-
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
             let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
