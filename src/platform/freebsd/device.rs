@@ -157,7 +157,6 @@ impl Device {
 			let IpAddr::V4(mask) = mask else {
 				unimplemented!("do not support IPv6 yet")
 			};
-			let tun_name:&String = &self.tun_name;
 			let ctl = &self.ctl;
 			unsafe {
 				let mut req: ifaliasreq = mem::zeroed();
@@ -324,9 +323,7 @@ impl AbstractDevice for Device {
 				return Err(io::Error::from(err).into());
 			}
 			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			if let Some(v) = &self.route {
-				self.set_alias(value,IpAddr::V4(previous.dest),IpAddr::V4(previous.netmask))?;
-			}
+			self.set_alias(value,IpAddr::V4(previous.dest),IpAddr::V4(previous.netmask))?;
 		}
 		Ok(())
     }
@@ -352,9 +349,7 @@ impl AbstractDevice for Device {
 				return Err(io::Error::from(err).into());
 			}
 			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			if let Some(v) = &self.route {
-				self.set_alias(IpAddr::V4(previous.addr),value,IpAddr::V4(previous.netmask))?;
-			}
+			self.set_alias(IpAddr::V4(previous.addr),value,IpAddr::V4(previous.netmask))?;
 		}
 		Ok(())
     }
@@ -398,9 +393,7 @@ impl AbstractDevice for Device {
 				return Err(io::Error::from(err).into());
 			}
 			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			if let Some(v) = &self.route {
-				self.set_alias(IpAddr::V4(previous.addr),IpAddr::V4(previous.dest),value)?;
-			}
+			self.set_alias(IpAddr::V4(previous.addr),IpAddr::V4(previous.dest),value)?;
 		}
 		Ok(())
     }

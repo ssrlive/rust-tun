@@ -14,7 +14,7 @@
 
 //! Bindings to internal FreeBSD stuff.
 
-use libc::{c_char, c_int, c_uint, ifreq, sockaddr, IFNAMSIZ,sockaddr_in};
+use libc::{c_char, c_int, c_uint, ifreq, sockaddr, IFNAMSIZ};
 use nix::{ioctl_readwrite, ioctl_write_ptr};
 
 #[allow(non_camel_case_types)]
