@@ -134,7 +134,7 @@ impl Device {
                 .unwrap_or(IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0))),
         )?;
 
-        device.configure(config)?;
+        //device.configure(config)?;
 
         Ok(device)
     }
