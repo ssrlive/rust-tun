@@ -225,9 +225,9 @@ impl Device {
                 &format!("{}/{}", network, prefix_len),
                 &v.dest.to_string(),
             ];
-			println!("{args:?}");
-            run_command("route", &args);
-            log::info!("route {}", args.join(" "));
+			//println!("{args:?}");
+            //run_command("route", &args);
+            //log::info!("route {}", args.join(" "));
         }
 
         // command: route -n add -net 10.0.0.9/24 10.0.0.1
@@ -323,10 +323,10 @@ impl AbstractDevice for Device {
 				println!("delete previous addr");
 				return Err(io::Error::from(err).into());
 			}
-			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			if let Some(v) = &self.route {
-				self.set_alias(value,IpAddr::V4(previous.dest),IpAddr::V4(previous.netmask))?;
-			}
+			// let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+			// if let Some(v) = &self.route {
+			// 	self.set_alias(value,IpAddr::V4(previous.dest),IpAddr::V4(previous.netmask))?;
+			// }
 		}
 		Ok(())
     }
@@ -346,16 +346,16 @@ impl AbstractDevice for Device {
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-		unsafe{
-			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
-				return Err(io::Error::from(err).into());
-			}
-			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			if let Some(v) = &self.route {
-				self.set_alias(IpAddr::V4(previous.addr),value,IpAddr::V4(previous.netmask))?;
-			}
-		}
+		// unsafe{
+		// 	let mut req = self.request();
+		// 	if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+		// 		return Err(io::Error::from(err).into());
+		// 	}
+		// 	let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+		// 	if let Some(v) = &self.route {
+		// 		self.set_alias(IpAddr::V4(previous.addr),value,IpAddr::V4(previous.netmask))?;
+		// 	}
+		// }
 		Ok(())
     }
 
@@ -392,16 +392,16 @@ impl AbstractDevice for Device {
     }
 
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
-		unsafe{
-			let mut req = self.request();
-			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
-				return Err(io::Error::from(err).into());
-			}
-			let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
-			if let Some(v) = &self.route {
-				self.set_alias(IpAddr::V4(previous.addr),IpAddr::V4(previous.dest),value)?;
-			}
-		}
+		// unsafe{
+		// 	let mut req = self.request();
+		// 	if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+		// 		return Err(io::Error::from(err).into());
+		// 	}
+		// 	let previous = self.route.as_ref().ok_or(Error::InvalidConfig)?;
+		// 	if let Some(v) = &self.route {
+		// 		self.set_alias(IpAddr::V4(previous.addr),IpAddr::V4(previous.dest),value)?;
+		// 	}
+		// }
 		Ok(())
     }
 
