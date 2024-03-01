@@ -270,7 +270,7 @@ impl AbstractDevice for Device {
 
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
 		let mut req = self.alias_request();
-		if let Err(err) = siocdifaddr(ctl.as_raw_fd(), &req) {
+		if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
 			println!("delete previous addr");
 			return Err(io::Error::from(err).into());
 		}
