@@ -28,7 +28,7 @@ use crate::{
     configuration::{Configuration, Layer},
     device::AbstractDevice,
     error::{Error, Result},
-    platform::bsd::sys::*,
+    platform::freebsd::sys::*,
     platform::posix::{self, Fd, SockAddr, Tun},
 };
 
