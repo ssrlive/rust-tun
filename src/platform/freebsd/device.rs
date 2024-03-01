@@ -74,7 +74,7 @@ impl Device {
                     Some(tun_name)
                 }
 
-                None => Some(String::from("tun0")),
+                None => None,
             };
 
             let queues_num = config.queues.unwrap_or(1);
@@ -87,23 +87,32 @@ impl Device {
 
 			let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
 
-            let tun = {
-				let device = format!("/dev/{dev_name}\0");
-                let fd = libc::open(device.as_ptr() as *const _, O_RDWR);
-                let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-				// if let Err(err) = siocgifflags(ctl.0, &mut req as *mut _ as *mut _) {
-				// 	return Err(io::Error::from(err).into());
-				// }
-				// println!("{:?}",req);   
-                tun
+            let (tun,device_name) = {
+				if let Some(name) = dev.as_ref(){
+					let device_path = format!("/dev/{}\0",name);
+					let fd = libc::open(device_path.as_ptr() as *const _, O_RDWR);
+					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+					(tun,name)
+				}else{
+					let (tun, device_name) = 'End:{
+						for i in 0..256{
+							let device_name = format!("tun{i}");
+							let device_path = format!("/dev/{device_name}\0");
+							let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
+							if fd > 0{
+								let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+								break 'End (tun, device_name);
+							}
+						}
+						return Err(Error::InvalidName);
+					};
+					(tun, device_name)
+				} 
             };
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
-            // let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
-            //     .to_string_lossy()
-            //     .to_string();
-			let tun_name = String::from("tun0");
+			let tun_name = device_name;
             Device {
                 tun_name,
                 tun: Tun::new(tun, mtu, false),
