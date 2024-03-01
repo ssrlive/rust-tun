@@ -92,16 +92,22 @@ impl Device {
 					let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 					(tun,name.clone())
 				}else{
-					let (tun, device_name) = 'End:{
-						for i in 0..256{
-							let device_name = format!("tun{i}");
-							let device_path = format!("/dev/{device_name}\0");
-							let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
-							if fd > 0{
-								let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
-								break 'End (tun, device_name);
+					let result = {
+						let find_fd = ||{
+							for i in 0..256{
+								let device_name = format!("tun{i}");
+								let device_path = format!("/dev/{device_name}\0");
+								let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
+								if fd > 0{
+									let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+									return Some((tun, device_name));
+								}
 							}
-						}
+							return None;
+						};
+						find_fd()
+					};
+					let Some((tun, device_name)) = result else {
 						return Err(Error::InvalidName);
 					};
 					(tun, device_name)
