@@ -265,6 +265,7 @@ impl AbstractDevice for Device {
 
     fn set_tun_name(&mut self, value: &str) -> Result<()> {
 		use std::ffi::CString;
+		println!("{}",self.tun_name);
 		unsafe{
 			if value.len() > IFNAMSIZ {
                 return Err(Error::NameTooLong);
@@ -278,7 +279,7 @@ impl AbstractDevice for Device {
             }
 
             self.tun_name = value.to_string();
-
+			println!("{}",self.tun_name);
 			Ok(())
 		}
     }
