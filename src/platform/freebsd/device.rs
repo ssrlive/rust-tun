@@ -225,6 +225,7 @@ impl Device {
                 &format!("{}/{}", network, prefix_len),
                 &v.dest.to_string(),
             ];
+			println!("{args:?}");
             run_command("route", &args)?;
             log::info!("route {}", args.join(" "));
         }
