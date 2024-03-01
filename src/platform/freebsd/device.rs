@@ -113,7 +113,7 @@ impl Device {
 						for i in 0..256{
 							let device_name = format!("/dev/tun{i}\0");
 							let fd = libc::open(device_name.as_ptr() as *const _, O_RDWR);
-							if fd as _ > 0{
+							if fd > 0{
 								let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
 								break 'End (tun, device_name);
 							}
