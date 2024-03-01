@@ -278,21 +278,6 @@ impl AbstractDevice for Device {
 			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 9)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
 		}
 		Ok(())
-        // println!("set_address");
-        // let IpAddr::V4(value) = value else {
-        //     unimplemented!("do not support IPv6 yet")
-        // };
-        // unsafe {
-        //     let mut req = self.request();
-        //     req.ifr_ifru.ifru_addr = SockAddr::from(value).into();
-		// 	println!("{req:?}");  
-        //     if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), & mut req) {
-		// 		println!("set addr error");
-        //         return Err(io::Error::from(err).into());
-        //     }
-
-        //     Ok(())
-        // }
     }
 
     fn destination(&self) -> Result<IpAddr> {
@@ -310,20 +295,14 @@ impl AbstractDevice for Device {
     }
 
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
-        // println!("set_destination");
-        // let IpAddr::V4(value) = value else {
-        //     unimplemented!("do not support IPv6 yet")
-        // };
-        // unsafe {
-        //     let mut req = self.request();
-        //     req.ifr_ifru.ifru_dstaddr = SockAddr::from(value).into();
-
-        //     if let Err(err) = siocsifdstaddr(self.ctl.as_raw_fd(), &req) {
-        //         return Err(io::Error::from(err).into());
-        //     }
-
-        //     Ok(())
-        // }
+		unsafe{
+			let mut req = self.request();
+			if let Err(err) = siocdifaddr(self.ctl.as_raw_fd(), &req) {
+				println!("delete previous set_destination");
+				return Err(io::Error::from(err).into());
+			}
+			self.set_alias(IpAddr::V4(Ipv4Addr::new(10, 0, 0, 11)),IpAddr::V4(Ipv4Addr::new(10, 0, 0, 8)),IpAddr::V4(Ipv4Addr::new(255, 255, 255, 0)))?;
+		}
 		Ok(())
     }
 
