@@ -42,7 +42,7 @@ pub(crate) fn generate_packet_information(
     const TUN_PROTO_IP4: [u8; PIL] = (libc::ETH_P_IP as u32).to_be_bytes();
 
     #[cfg(any(target_os = "macos", target_os = "ios"))]
-    const TUN_PROTO_IP6: [u8; PIL] = 0x000A_u32.to_be_bytes();
+    const TUN_PROTO_IP6: [u8; PIL] = 0x001E_u32.to_be_bytes();
     #[cfg(any(target_os = "macos", target_os = "ios"))]
     const TUN_PROTO_IP4: [u8; PIL] = 0x0002_u32.to_be_bytes();
 
