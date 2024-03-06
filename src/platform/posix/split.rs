@@ -48,9 +48,9 @@ pub(crate) fn generate_packet_information(
 
     // FIXME: Currently we don't know if PI exists for freebsd. Here just a dummy.
     #[cfg(target_os = "freebsd")]
-    const TUN_PROTO_IP6: [u8; PIL] = (libc::ETH_P_IPV6 as u32).to_be_bytes();
+    const TUN_PROTO_IP6: [u8; PIL] = 0x86DD_u32.to_be_bytes();
     #[cfg(target_os = "freebsd")]
-    const TUN_PROTO_IP4: [u8; PIL] = (libc::ETH_P_IP as u32).to_be_bytes();
+    const TUN_PROTO_IP4: [u8; PIL] = 0x0800_u32.to_be_bytes();
 
     #[cfg(unix)]
     if _packet_information {
