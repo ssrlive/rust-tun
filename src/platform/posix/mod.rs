@@ -15,7 +15,7 @@
 //! POSIX compliant support.
 
 mod sockaddr;
-pub use self::sockaddr::SockAddr;
+pub(crate) use sockaddr::{ipaddr_to_sockaddr, sockaddr_to_rs_addr, sockaddr_union};
 
 mod fd;
 pub(crate) use self::fd::Fd;
