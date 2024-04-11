@@ -96,9 +96,9 @@ impl Device {
 
             let tun = {
                 let fd = libc::open(b"/dev/net/tun\0".as_ptr() as *const _, O_RDWR);
-                let tun = Fd::new(fd).map_err(|_| io::Error::last_os_error())?;
+                let tun = Fd::new(fd, true).map_err(|_| io::Error::last_os_error())?;
 
-                if let Err(err) = tunsetiff(tun.0, &mut req as *mut _ as *mut _) {
+                if let Err(err) = tunsetiff(tun.inner, &mut req as *mut _ as *mut _) {
                     return Err(io::Error::from(err).into());
                 }
 
@@ -107,7 +107,7 @@ impl Device {
 
             let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
-            let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0))?;
+            let ctl = Fd::new(libc::socket(AF_INET, SOCK_DGRAM, 0), true)?;
 
             let tun_name = CStr::from_ptr(req.ifr_name.as_ptr())
                 .to_string_lossy()
