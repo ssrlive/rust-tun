@@ -261,11 +261,9 @@ impl AbstractDevice for Device {
     fn address(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifaddr(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_addr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -274,13 +272,10 @@ impl AbstractDevice for Device {
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_addr);
-
             if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
-
             Ok(())
         }
     }
@@ -288,11 +283,9 @@ impl AbstractDevice for Device {
     fn destination(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifdstaddr(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_dstaddr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -301,13 +294,10 @@ impl AbstractDevice for Device {
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_dstaddr);
-
             if let Err(err) = siocsifdstaddr(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
-
             Ok(())
         }
     }
@@ -315,11 +305,9 @@ impl AbstractDevice for Device {
     fn broadcast(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifbrdaddr(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_broadaddr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -328,13 +316,10 @@ impl AbstractDevice for Device {
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_broadaddr);
-
             if let Err(err) = siocsifbrdaddr(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
-
             Ok(())
         }
     }
@@ -342,11 +327,9 @@ impl AbstractDevice for Device {
     fn netmask(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifnetmask(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_netmask as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -356,11 +339,9 @@ impl AbstractDevice for Device {
         unsafe {
             let mut req = self.request();
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_netmask);
-
             if let Err(err) = siocsifnetmask(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
-
             Ok(())
         }
     }

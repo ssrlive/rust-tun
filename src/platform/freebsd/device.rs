@@ -321,11 +321,9 @@ impl AbstractDevice for Device {
     fn address(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifaddr(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_addr as *const _ as *const posix::sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -350,11 +348,9 @@ impl AbstractDevice for Device {
     fn destination(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifdstaddr(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_dstaddr as *const _ as *const posix::sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -379,11 +375,9 @@ impl AbstractDevice for Device {
     fn broadcast(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifbrdaddr(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_broadaddr as *const _ as *const posix::sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -396,11 +390,9 @@ impl AbstractDevice for Device {
     fn netmask(&self) -> Result<IpAddr> {
         unsafe {
             let mut req = self.request();
-
             if let Err(err) = siocgifnetmask(self.ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             // NOTE: Here should be `ifru_netmask` instead of `ifru_addr`, but `ifreq` does not define it.
             let sa = &req.ifr_ifru.ifru_addr as *const _ as *const posix::sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())

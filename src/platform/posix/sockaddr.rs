@@ -58,20 +58,20 @@ pub fn rs_addr_to_sockaddr(addr: std::net::SocketAddr) -> sockaddr_union {
     }
 }
 
-pub unsafe fn ipaddr_to_sockaddr<T: Into<std::net::IpAddr>>(
-    src_addr: T,
-    src_port: u16,
-    mut target_addr: &mut libc::sockaddr,
-) {
+pub unsafe fn ipaddr_to_sockaddr<T>(src_addr: T, src_port: u16, mut addr: &mut libc::sockaddr)
+where
+    T: Into<std::net::IpAddr>,
+{
     let sa = rs_addr_to_sockaddr((src_addr.into(), src_port).into());
     std::ptr::copy_nonoverlapping(
         &sa as *const _ as *const libc::c_void,
-        &mut target_addr as *mut _ as *mut libc::c_void,
+        &mut addr as *mut _ as *mut libc::c_void,
         std::mem::size_of::<libc::__c_anonymous_ifr_ifru>(),
     );
 }
 
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub union sockaddr_union {
     pub addr_stor: libc::sockaddr_storage,
     pub addr6: libc::sockaddr_in6,

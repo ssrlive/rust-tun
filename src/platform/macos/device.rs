@@ -326,11 +326,9 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             if let Err(err) = siocgifaddr(ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_addr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -343,9 +341,7 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_addr);
-
             if let Err(err) = siocsifaddr(ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
@@ -361,11 +357,9 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             if let Err(err) = siocgifdstaddr(ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_dstaddr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -378,9 +372,7 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_dstaddr);
-
             if let Err(err) = siocsifdstaddr(ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
@@ -397,11 +389,9 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             if let Err(err) = siocgifbrdaddr(ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_broadaddr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -415,13 +405,10 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_broadaddr);
-
             if let Err(err) = siocsifbrdaddr(ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
-
             Ok(())
         }
     }
@@ -430,11 +417,9 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             if let Err(err) = siocgifnetmask(ctl.as_raw_fd(), &mut req) {
                 return Err(io::Error::from(err).into());
             }
-
             let sa = &req.ifr_ifru.ifru_addr as *const _ as *const sockaddr_union;
             Ok(sockaddr_to_rs_addr(&*sa).ok_or(Error::InvalidAddress)?.ip())
         }
@@ -447,10 +432,8 @@ impl AbstractDevice for Device {
         let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
         unsafe {
             let mut req = self.request()?;
-
             // Note: Here should be `ifru_netmask`, but it is not defined in `ifreq`.
             ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_addr);
-
             if let Err(err) = siocsifnetmask(ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
