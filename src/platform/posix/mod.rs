@@ -15,6 +15,8 @@
 //! POSIX compliant support.
 
 mod sockaddr;
+#[cfg(any(target_os = "freebsd", target_os = "macos"))]
+pub(crate) use sockaddr::rs_addr_to_sockaddr;
 pub(crate) use sockaddr::{ipaddr_to_sockaddr, sockaddr_to_rs_addr, sockaddr_union};
 
 mod fd;
