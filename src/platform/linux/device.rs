@@ -33,6 +33,8 @@ use crate::{
     platform::posix::{self, ipaddr_to_sockaddr, sockaddr_to_rs_addr, sockaddr_union, Fd, Tun},
 };
 
+const OVERWRITE_SIZE: usize = std::mem::size_of::<libc::__c_anonymous_ifr_ifru>();
+
 /// A TUN device using the TUN/TAP Linux driver.
 pub struct Device {
     tun_name: String,
@@ -272,7 +274,7 @@ impl AbstractDevice for Device {
     fn set_address(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_addr);
+            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_addr, OVERWRITE_SIZE);
             if let Err(err) = siocsifaddr(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
@@ -294,7 +296,7 @@ impl AbstractDevice for Device {
     fn set_destination(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_dstaddr);
+            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_dstaddr, OVERWRITE_SIZE);
             if let Err(err) = siocsifdstaddr(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
@@ -316,7 +318,7 @@ impl AbstractDevice for Device {
     fn set_broadcast(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_broadaddr);
+            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_broadaddr, OVERWRITE_SIZE);
             if let Err(err) = siocsifbrdaddr(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }
@@ -338,7 +340,7 @@ impl AbstractDevice for Device {
     fn set_netmask(&mut self, value: IpAddr) -> Result<()> {
         unsafe {
             let mut req = self.request();
-            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_netmask);
+            ipaddr_to_sockaddr(value, 0, &mut req.ifr_ifru.ifru_netmask, OVERWRITE_SIZE);
             if let Err(err) = siocsifnetmask(self.ctl.as_raw_fd(), &req) {
                 return Err(io::Error::from(err).into());
             }

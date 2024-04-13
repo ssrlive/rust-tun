@@ -58,15 +58,21 @@ pub fn rs_addr_to_sockaddr(addr: std::net::SocketAddr) -> sockaddr_union {
     }
 }
 
-pub unsafe fn ipaddr_to_sockaddr<T>(src_addr: T, src_port: u16, addr: &mut libc::sockaddr)
-where
+/// # Safety
+/// Fill the `addr` with the `src_addr` and `src_port`, the `size` should be the size of overwriting
+pub unsafe fn ipaddr_to_sockaddr<T>(
+    src_addr: T,
+    src_port: u16,
+    addr: &mut libc::sockaddr,
+    size: usize,
+) where
     T: Into<std::net::IpAddr>,
 {
     let sa = rs_addr_to_sockaddr((src_addr.into(), src_port).into());
     std::ptr::copy_nonoverlapping(
         &sa as *const _ as *const libc::c_void,
         addr as *mut _ as *mut libc::c_void,
-        std::mem::size_of::<libc::__c_anonymous_ifr_ifru>(),
+        size.min(std::mem::size_of::<sockaddr_union>()),
     );
 }
 
@@ -104,7 +110,8 @@ fn test_conversion() {
 
     let old = std::net::IpAddr::V4([10, 0, 0, 33].into());
     let mut addr: sockaddr_union = unsafe { std::mem::zeroed() };
-    unsafe { ipaddr_to_sockaddr(old, 0x0208, &mut addr.addr) };
+    let size = std::mem::size_of::<libc::sockaddr_in>();
+    unsafe { ipaddr_to_sockaddr(old, 0x0208, &mut addr.addr, size) };
     let ip = unsafe { sockaddr_to_rs_addr(&addr).unwrap() };
     assert_eq!(ip, std::net::SocketAddr::new(old, 0x0208));
 }
