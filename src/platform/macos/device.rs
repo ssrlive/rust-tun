@@ -19,7 +19,7 @@ use crate::{
     error::{Error, Result},
     platform::{
         macos::sys::*,
-        posix::{self, ipaddr_to_sockaddr, sockaddr_to_rs_addr, sockaddr_union},
+        posix::{self, ipaddr_to_sockaddr, sockaddr_to_rs_addr, sockaddr_union, Fd},
     },
 };
 
@@ -70,8 +70,8 @@ impl Device {
     pub fn new(config: &Configuration) -> Result<Self> {
         let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
         if let Some(fd) = config.raw_fd {
-            let close_on_drop = config.close_on_drop.unwrap_or(true);
-            let tun = posix::Fd::new(fd, close_on_drop).map_err(|_| io::Error::last_os_error())?;
+            let close_fd_on_drop = config.close_fd_on_drop.unwrap_or(true);
+            let tun = Fd::new(fd, close_fd_on_drop).map_err(|_| io::Error::last_os_error())?;
             let device = Device {
                 tun_name: None,
                 tun: posix::Tun::new(tun, mtu, config.platform_config.packet_information),

@@ -20,17 +20,17 @@ use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 /// POSIX file descriptor support for `io` traits.
 pub(crate) struct Fd {
     pub(crate) inner: RawFd,
-    close_on_drop: bool,
+    close_fd_on_drop: bool,
 }
 
 impl Fd {
-    pub fn new(value: RawFd, close_on_drop: bool) -> Result<Self> {
+    pub fn new(value: RawFd, close_fd_on_drop: bool) -> Result<Self> {
         if value < 0 {
             return Err(Error::InvalidDescriptor);
         }
         Ok(Fd {
             inner: value,
-            close_on_drop,
+            close_fd_on_drop,
         })
     }
 
@@ -77,7 +77,7 @@ impl IntoRawFd for Fd {
 
 impl Drop for Fd {
     fn drop(&mut self) {
-        if self.close_on_drop && self.inner >= 0 {
+        if self.close_fd_on_drop && self.inner >= 0 {
             unsafe { libc::close(self.inner) };
         }
     }
