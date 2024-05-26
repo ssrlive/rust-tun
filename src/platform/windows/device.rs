@@ -12,6 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use std::env;
 use std::io::{self, Read, Write};
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::Arc;
@@ -31,7 +32,12 @@ pub struct Device {
 impl Device {
     /// Create a new `Device` for the given `Configuration`.
     pub fn new(config: &Configuration) -> Result<Self> {
-        let wintun = unsafe { wintun::load()? };
+        let wintun = unsafe {
+            let wintun_libray_path =
+                env::var("WINTUN_LIBARAY_PATH").unwrap_or("wintun.dll".to_string());
+            let wintun = libloading::Library::new(wintun_libray_path)?;
+            wintun::load_from_library(wintun)?
+        };
         let tun_name = config.tun_name.as_deref().unwrap_or("wintun");
         let guid = config.platform_config.device_guid;
         let adapter = match wintun::Adapter::open(&wintun, tun_name) {
