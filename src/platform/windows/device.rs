@@ -34,7 +34,7 @@ impl Device {
     pub fn new(config: &Configuration) -> Result<Self> {
         let wintun = unsafe {
             let wintun_libray_path =
-                env::var("WINTUN_LIBARAY_PATH").unwrap_or("wintun.dll".to_string());
+                std::env::var("WINTUN_LIBARAY_PATH").unwrap_or("wintun.dll".to_string());
             let wintun = libloading::Library::new(wintun_libray_path)?;
             wintun::load_from_library(wintun)?
         };
