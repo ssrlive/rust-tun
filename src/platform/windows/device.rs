@@ -12,7 +12,6 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::env;
 use std::io::{self, Read, Write};
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::Arc;
@@ -34,7 +33,7 @@ impl Device {
     pub fn new(config: &Configuration) -> Result<Self> {
         let wintun = unsafe {
             let wintun_libray_path =
-                env::var("WINTUN_LIBARAY_PATH").unwrap_or("wintun.dll".to_string());
+                std::env::var("WINTUN_LIBARAY_PATH").unwrap_or("wintun.dll".to_string());
             let wintun = libloading::Library::new(wintun_libray_path)?;
             wintun::load_from_library(wintun)?
         };
