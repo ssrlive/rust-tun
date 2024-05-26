@@ -33,10 +33,16 @@ impl Device {
     /// Create a new `Device` for the given `Configuration`.
     pub fn new(config: &Configuration) -> Result<Self> {
         let wintun = unsafe {
-            let wintun_libray_path =
-                std::env::var("WINTUN_LIBARAY_PATH").unwrap_or("wintun.dll".to_string());
-            let wintun = libloading::Library::new(wintun_libray_path)?;
-            wintun::load_from_library(wintun)?
+            cfg_if::cfg_if! {
+                if #[cfg(feature = "dynamic-wintun")] {
+                    let wintun_library_path = std::env::var("WINTUN_LIBRARY_PATH")
+                        .unwrap_or_else(|_| "wintun.dll".to_string());
+                    let wintun_library = libloading::Library::new(wintun_library_path)?;
+                    wintun::load_from_library(wintun_library)?
+                } else {
+                    wintun::load()?
+                }
+            }
         };
         let tun_name = config.tun_name.as_deref().unwrap_or("wintun");
         let guid = config.platform_config.device_guid;

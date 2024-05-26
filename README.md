@@ -134,6 +134,7 @@ pub extern "C" fn start_tun(fd: std::os::raw::c_int) {
 
 Windows
 -----
-You need to copy the [wintun.dll](https://wintun.net/) file which matches your architecture to 
-the same directory as your executable or can set `WINTUN_LIBARAY_PATH` to the dll file and run your program as administrator.
+To run your program successfully, you have two options:
 
+1. Place the [wintun.dll](https://wintun.net/) file, corresponding to your architecture, in the same directory as your executable.
+2. Alternatively, you can enable the `dynamic-wintun` feature and set the `WINTUN_LIBRARY_PATH` environment variable to point to the DLL file. Then, execute your program as an administrator.
