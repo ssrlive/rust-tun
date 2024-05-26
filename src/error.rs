@@ -54,7 +54,7 @@ pub enum Error {
     #[error(transparent)]
     WintunError(#[from] wintun::Error),
 
-    #[cfg(target_os = "windows")]
+    #[cfg(all(target_os = "windows", feature = "dynamic-wintun"))]
     #[error(transparent)]
     LibloadingError(#[from] libloading::Error),
 }
