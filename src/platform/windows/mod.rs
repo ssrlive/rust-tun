@@ -32,7 +32,7 @@ impl Default for PlatformConfig {
     fn default() -> Self {
         Self {
             device_guid: None,
-            wintun_path: "wintun.dll".to_string(),
+            wintun_path: "wintun".to_string(),
         }
     }
 }
