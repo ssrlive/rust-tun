@@ -46,8 +46,8 @@ impl PlatformConfig {
     /// Use a custom path to the wintun.dll instead of looking in the working directory.
     /// Security note: It is up to the caller to ensure that the library can be safely loaded from
     /// the indicated path.
-    pub fn custom_wintun_path(&mut self, wintun_path: String) {
-        self.wintun_path = wintun_path;
+    pub fn custom_wintun_path(&mut self, wintun_path: &str) {
+        self.wintun_path = wintun_path.to_string();
     }
 }
 
