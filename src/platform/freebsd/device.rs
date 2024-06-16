@@ -29,7 +29,7 @@ use crate::{
     device::AbstractDevice,
     error::{Error, Result},
     platform::freebsd::sys::*,
-    platform::posix::{self, Fd, Tun, sockaddr_union},
+    platform::posix::{self, sockaddr_union, Fd, Tun},
 };
 
 #[derive(Clone, Copy)]
