@@ -67,6 +67,7 @@ impl Device {
             adapter.set_dns_servers(dns_servers)?;
         }
         let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
+        adapter.set_mtu(mtu as usize)?;
 
         let session = adapter.start_session(wintun::MAX_RING_CAPACITY)?;
 
@@ -201,7 +202,6 @@ impl AbstractDevice for Device {
 
     /// The return value is always `Ok(65535)` due to wintun
     fn mtu(&self) -> Result<u16> {
-        // Note: wintun mtu is always 65535
         Ok(self.mtu)
     }
 
