@@ -21,6 +21,9 @@ use wintun::Session;
 use crate::configuration::Configuration;
 use crate::device::AbstractDevice;
 use crate::error::{Error, Result};
+use crate::platform::windows::verify_dll_file::{
+    get_dll_absolute_path, get_signer_name, verify_embedded_signature,
+};
 
 /// A TUN device using the wintun driver.
 pub struct Device {
@@ -31,9 +34,18 @@ pub struct Device {
 impl Device {
     /// Create a new `Device` for the given `Configuration`.
     pub fn new(config: &Configuration) -> Result<Self> {
-        let wintun_path = &config.platform_config.wintun_path;
+        let wintun_file = &config.platform_config.wintun_file;
         let wintun = unsafe {
-            let wintun = libloading::Library::new(wintun_path)?;
+            // Ensure the dll file has not been tampered with.
+            let abs_path = get_dll_absolute_path(wintun_file)?;
+            verify_embedded_signature(&abs_path)?;
+            let signer_name = get_signer_name(&abs_path)?;
+            let wp = super::WINTUN_PROVIDER;
+            if signer_name != wp {
+                return Err(format!("Signer \"{}\" not match \"{}\"", signer_name, wp).into());
+            }
+
+            let wintun = libloading::Library::new(wintun_file)?;
             wintun::load_from_library(wintun)?
         };
         let tun_name = config.tun_name.as_deref().unwrap_or("wintun");
