@@ -28,8 +28,6 @@ use crate::platform::windows::verify_dll_file::{
 /// A TUN device using the wintun driver.
 pub struct Device {
     pub(crate) tun: Tun,
-    #[allow(unused)]
-    mtu: u16,
 }
 
 impl Device {
@@ -67,7 +65,6 @@ impl Device {
         if let Some(dns_servers) = &config.platform_config.dns_servers {
             adapter.set_dns_servers(dns_servers)?;
         }
-        let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
 
         let session = adapter.start_session(wintun::MAX_RING_CAPACITY)?;
 
@@ -76,10 +73,8 @@ impl Device {
                 session: Arc::new(session),
                 adapter,
             },
-            mtu,
         };
 
-        // This is not needed since we use netsh to set the address.
         device.configure(config)?;
 
         Ok(device)
