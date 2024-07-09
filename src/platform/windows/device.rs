@@ -16,7 +16,7 @@ use std::io::{self, Read, Write};
 use std::net::{IpAddr, Ipv4Addr};
 use std::sync::Arc;
 
-use wintun::Session;
+use wintun::{Adapter, Session};
 
 use crate::configuration::Configuration;
 use crate::device::AbstractDevice;
@@ -28,6 +28,7 @@ use crate::platform::windows::verify_dll_file::{
 /// A TUN device using the wintun driver.
 pub struct Device {
     pub(crate) tun: Tun,
+    #[allow(unused)]
     mtu: u16,
 }
 
@@ -67,13 +68,13 @@ impl Device {
             adapter.set_dns_servers(dns_servers)?;
         }
         let mtu = config.mtu.unwrap_or(crate::DEFAULT_MTU);
-        adapter.set_mtu(mtu as usize)?;
 
         let session = adapter.start_session(wintun::MAX_RING_CAPACITY)?;
 
         let mut device = Device {
             tun: Tun {
                 session: Arc::new(session),
+                adapter,
             },
             mtu,
         };
@@ -200,15 +201,19 @@ impl AbstractDevice for Device {
         Ok(())
     }
 
-    /// The return value is always `Ok(65535)` due to wintun
     fn mtu(&self) -> Result<u16> {
-        Ok(self.mtu)
+        self.tun
+            .adapter
+            .get_mtu()
+            .map(|x| x as u16)
+            .map_err(Error::WintunError)
     }
 
-    /// This setting has no effect since the mtu of wintun is always 65535
-    fn set_mtu(&mut self, _: u16) -> Result<()> {
-        // Note: no-op due to mtu of wintun is always 65535
-        Ok(())
+    fn set_mtu(&mut self, mtu: u16) -> Result<()> {
+        self.tun
+            .adapter
+            .set_mtu(mtu as usize)
+            .map_err(Error::WintunError)
     }
 
     fn packet_information(&self) -> bool {
@@ -219,6 +224,7 @@ impl AbstractDevice for Device {
 
 pub struct Tun {
     session: Arc<Session>,
+    adapter: Arc<Adapter>,
 }
 
 impl Tun {
