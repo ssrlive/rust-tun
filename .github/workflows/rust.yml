@@ -51,6 +51,24 @@ jobs:
       if: ${{ failure() }}
       run: echo "Android build job failed" && false
 
+  build_n_test_ios:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install cargo lipo and rust compiler for ios target
+      if: ${{ !cancelled() }}
+      run: |
+        cargo install --locked cargo-lipo
+        rustup target add x86_64-apple-ios aarch64-apple-ios
+    - name: Build
+      if: ${{ !cancelled() }}
+      run: |
+        cargo lipo --verbose --all-features --features="async tokio/rt-multi-thread"
+    - name: Abort on error
+      if: ${{ failure() }}
+      run: echo "iOs build job failed" && false
+
   semver:
     name: Check semver
     strategy:
