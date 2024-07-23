@@ -45,6 +45,9 @@ jobs:
       run: |
         cargo install --locked cargo-ndk
         rustup target add x86_64-linux-android
+    - name: clippy
+      if: ${{ !cancelled() }}
+      run: cargo ndk -t x86_64 clippy --all-features --features="async tokio/rt-multi-thread" -- -D warnings
     - name: Build
       if: ${{ !cancelled() }}
       run: |
@@ -65,6 +68,9 @@ jobs:
       run: |
         cargo install --locked cargo-lipo
         rustup target add x86_64-apple-ios aarch64-apple-ios
+    - name: clippy
+      if: ${{ !cancelled() }}
+      run: cargo clippy --target x86_64-apple-ios --all-features --features="async tokio/rt-multi-thread" -- -D warnings
     - name: Build
       if: ${{ !cancelled() }}
       run: |
