@@ -33,6 +33,24 @@ jobs:
       if: ${{ failure() }}
       run: echo "Some of jobs failed" && false
 
+  build_n_test_android:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install cargo ndk and rust compiler for android target
+      if: ${{ !cancelled() }}
+      run: |
+        cargo install --locked cargo-ndk
+        rustup target add x86_64-linux-android
+    - name: Build
+      if: ${{ !cancelled() }}
+      run: |
+        cargo ndk -t x86_64 rustc --verbose --all-features --features="async tokio/rt-multi-thread" --lib --crate-type=cdylib
+    - name: Abort on error
+      if: ${{ failure() }}
+      run: echo "Android build job failed" && false
+
   semver:
     name: Check semver
     strategy:
