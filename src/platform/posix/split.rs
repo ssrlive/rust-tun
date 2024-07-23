@@ -78,16 +78,16 @@ impl Reader {
     }
 
     pub(crate) fn recv(&self, mut in_buf: &mut [u8]) -> io::Result<usize> {
-        let stack_buf_len = crate::DEFAULT_MTU as usize + PIL;
+        const STACK_BUF_LEN: usize = crate::DEFAULT_MTU as usize + PIL;
         let in_buf_len = in_buf.len() + self.offset;
 
         // The following logic is to prevent dynamically allocating Vec on every recv
         // As long as the MTU is set to value lesser than 1500, this api uses `stack_buf`
         // and avoids `Vec` allocation
-        let local_buf = if in_buf_len > stack_buf_len && self.offset != 0 {
+        let local_buf = if in_buf_len > STACK_BUF_LEN && self.offset != 0 {
             &mut vec![0u8; in_buf_len][..]
         } else {
-            &mut [0u8; crate::DEFAULT_MTU as usize + PIL]
+            &mut [0u8; STACK_BUF_LEN]
         };
 
         let either_buf = if self.offset != 0 {
@@ -143,16 +143,16 @@ impl Writer {
     }
 
     pub(crate) fn send(&self, in_buf: &[u8]) -> io::Result<usize> {
-        let stack_buf_len = crate::DEFAULT_MTU as usize + PIL;
+        const STACK_BUF_LEN: usize = crate::DEFAULT_MTU as usize + PIL;
         let in_buf_len = in_buf.len() + self.offset;
 
         // The following logic is to prevent dynamically allocating Vec on every send
         // As long as the MTU is set to value lesser than 1500, this api uses `stack_buf`
         // and avoids `Vec` allocation
-        let local_buf = if in_buf_len > stack_buf_len && self.offset != 0 {
+        let local_buf = if in_buf_len > STACK_BUF_LEN && self.offset != 0 {
             &mut vec![0u8; in_buf_len][..]
         } else {
-            &mut [0u8; crate::DEFAULT_MTU as usize + PIL]
+            &mut [0u8; STACK_BUF_LEN]
         };
 
         let either_buf = if self.offset != 0 {
