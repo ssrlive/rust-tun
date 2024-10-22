@@ -71,14 +71,12 @@ impl PlatformConfig {
     }
 
     /// Enable IFF_NAPI flag.
-    #[cfg(target_os = "linux")]
     pub fn napi(&mut self) -> &mut Self {
         self.napi = true;
         self
     }
 
     /// Enable IFF_VNET_HDR flag.
-    #[cfg(target_os = "linux")]
     pub fn vnet_hdr(&mut self) -> &mut Self {
         self.vnet_hdr = true;
         self

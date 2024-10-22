@@ -112,9 +112,9 @@ impl Device {
             let vnet_hdr = config.platform_config.vnet_hdr;
             req.ifr_ifru.ifru_flags = device_type
                 | if packet_information { 0 } else { iff_no_pi }
-                | if queues_num > 1 { iff_multi_queue } else { 0 }
                 | if napi { iff_napi } else { 0 }
-                | if vnet_hdr { iff_vnet_hdr } else { 0 };
+                | if vnet_hdr { iff_vnet_hdr } else { 0 }
+                | if queues_num > 1 { iff_multi_queue } else { 0 };
 
             let tun_fd = {
                 let fd = libc::open(b"/dev/net/tun\0".as_ptr() as *const _, O_RDWR);
