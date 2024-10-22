@@ -29,6 +29,9 @@ pub struct PlatformConfig {
     pub(crate) packet_information: bool,
     /// root privileges required or not
     pub(crate) ensure_root_privileges: bool,
+
+    /// Enable IFF_NAPI
+    pub(crate) napi: bool,
 }
 
 /// `packet_information` is default to be `false` and `ensure_root_privileges` is default to be `true`.
@@ -37,6 +40,7 @@ impl Default for PlatformConfig {
         PlatformConfig {
             packet_information: false,
             ensure_root_privileges: true,
+            napi: false,
         }
     }
 }
@@ -59,6 +63,13 @@ impl PlatformConfig {
     /// since some operations need it such as assigning IP/netmask/destination etc.
     pub fn ensure_root_privileges(&mut self, value: bool) -> &mut Self {
         self.ensure_root_privileges = value;
+        self
+    }
+
+    /// Enable IFF_NAPI flag.
+    #[cfg(target_os = "linux")]
+    pub fn napi(&mut self) -> &mut Self {
+        self.napi = true;
         self
     }
 }
