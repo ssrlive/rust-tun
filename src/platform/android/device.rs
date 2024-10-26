@@ -97,7 +97,7 @@ impl Write for Device {
 }
 
 impl AbstractDevice for Device {
-    fn tun_index(&self) -> Result<u32> {
+    fn tun_index(&self) -> Result<i32> {
         Err(Error::NotImplemented)
     }
 
