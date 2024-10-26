@@ -27,8 +27,9 @@ use crate::{
 const OVERWRITE_SIZE: usize = std::mem::size_of::<libc::__c_anonymous_ifr_ifru>();
 
 use libc::{
-    self, c_char, c_short, c_uint, c_void, sockaddr, if_nametoindex, socklen_t, AF_INET, AF_SYSTEM, AF_SYS_CONTROL,
-    IFF_RUNNING, IFF_UP, IFNAMSIZ, PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL, UTUN_OPT_IFNAME, SIOCGIFADDR
+    self, c_char, c_short, c_uint, c_void, if_nametoindex, sockaddr, socklen_t, AF_INET, AF_SYSTEM,
+    AF_SYS_CONTROL, IFF_RUNNING, IFF_UP, IFNAMSIZ, PF_SYSTEM, SIOCGIFADDR, SOCK_DGRAM,
+    SYSPROTO_CONTROL, UTUN_OPT_IFNAME,
 };
 use std::{
     ffi::CStr,

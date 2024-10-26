@@ -13,8 +13,9 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use libc::{
-    self, c_char, c_short, ioctl, ifreq, AF_INET, IFF_MULTI_QUEUE, IFF_NAPI, IFF_NO_PI, IFF_RUNNING,
-    IFF_TAP, IFF_TUN, IFF_UP, IFF_VNET_HDR, IFNAMSIZ, O_RDWR, SOCK_DGRAM, SIOCGIFINDEX
+    self, c_char, c_short, ifreq, ioctl, AF_INET, IFF_MULTI_QUEUE, IFF_NAPI, IFF_NO_PI,
+    IFF_RUNNING, IFF_TAP, IFF_TUN, IFF_UP, IFF_VNET_HDR, IFNAMSIZ, O_RDWR, SIOCGIFINDEX,
+    SOCK_DGRAM,
 };
 use std::{
     ffi::{CStr, CString},
@@ -239,7 +240,6 @@ impl Write for Device {
 }
 
 impl AbstractDevice for Device {
-
     fn tun_index(&self) -> Result<i32> {
         unsafe {
             let mut req = self.request();
