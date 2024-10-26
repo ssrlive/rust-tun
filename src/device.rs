@@ -49,7 +49,7 @@ pub trait AbstractDevice: Read + Write {
     }
 
     /// Get the device index.
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
     fn tun_index(&self) -> Result<i32>;
 
     /// Get the device tun name.
