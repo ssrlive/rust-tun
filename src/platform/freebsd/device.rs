@@ -279,12 +279,13 @@ impl Write for Device {
 impl AbstractDevice for Device {
     fn tun_index(&self) -> Result<i32> {
         let name = self.tun_name()?;
-        let name_cstr = std::ffi::CString::new(&name.as_str()).map_err(|_| {
-            std::io::Error::new(std::io::ErrorKind::InvalidInput, "Invalid interface name")
+        let name_cstr = std::ffi::CString::new(&*name).map_err(|_| {
+            use std::io::ErrorKind::InvalidInput;
+            Error::from(std::io::Error::new(InvalidInput, "Invalid interface name"))
         })?;
         let result = unsafe { libc::if_nametoindex(name_cstr.as_ptr()) };
         if result == 0 {
-            Err(std::io::Error::last_os_error())
+            Err(std::io::Error::last_os_error().into())
         } else {
             Ok(result as _)
         }

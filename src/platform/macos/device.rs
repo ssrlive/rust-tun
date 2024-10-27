@@ -27,9 +27,8 @@ use crate::{
 const OVERWRITE_SIZE: usize = std::mem::size_of::<libc::__c_anonymous_ifr_ifru>();
 
 use libc::{
-    self, c_char, c_short, c_uint, c_void, if_nametoindex, sockaddr, socklen_t, AF_INET, AF_SYSTEM,
-    AF_SYS_CONTROL, IFF_RUNNING, IFF_UP, IFNAMSIZ, PF_SYSTEM, SIOCGIFADDR, SOCK_DGRAM,
-    SYSPROTO_CONTROL, UTUN_OPT_IFNAME,
+    self, c_char, c_short, c_uint, c_void, sockaddr, socklen_t, AF_INET, AF_SYSTEM, AF_SYS_CONTROL,
+    IFF_RUNNING, IFF_UP, IFNAMSIZ, PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL, UTUN_OPT_IFNAME,
 };
 use std::{
     ffi::CStr,
@@ -306,15 +305,16 @@ impl Write for Device {
 
 impl AbstractDevice for Device {
     fn tun_index(&self) -> Result<i32> {
-        let ctl = self.ctl.as_ref().ok_or(Error::InvalidConfig)?;
-        unsafe {
-            let mut req = self.request()?;
-            if libc::ioctl(ctl.as_raw_fd(), SIOCGIFADDR, &mut req) < 0 {
-                return Err(std::io::Error::last_os_error().into());
-            }
-
-            let index = if_nametoindex(req.ifr_name.as_ptr());
-            Ok(index as i32)
+        let name = self.tun_name()?;
+        let name_cstr = std::ffi::CString::new(&*name).map_err(|_| {
+            use std::io::ErrorKind::InvalidInput;
+            Error::from(std::io::Error::new(InvalidInput, "Invalid interface name"))
+        })?;
+        let result = unsafe { libc::if_nametoindex(name_cstr.as_ptr()) };
+        if result == 0 {
+            Err(std::io::Error::last_os_error().into())
+        } else {
+            Ok(result as _)
         }
     }
 
